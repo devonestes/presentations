@@ -1,7 +1,4 @@
 # Jekyll configuration
-markdown: kramdown
-highlighter: rouge
-paginate: 7
 language: 'en-us'
 
 # Website info
@@ -19,12 +16,6 @@ short_url: 'http://www.devonestes.com'
 t_description: 'An (at least) monthly weblog of thoughts on software'
 baseurl: /
 permalink: /:title/
-
-# gems and other configs
-gems:
-  - jekyll-paginate
-  - kramdown 
-  - jekyll-twitter-plugin
 
 exclude:
   - README.md
@@ -44,7 +35,7 @@ defaults:
       path: ""
       type: "posts"
     values:
-      layout: "post"
+      layout: "presentation"
       logo: "assets/images/logo.png"
       navigation: True
       subclass: 'post tag-test tag-content'
