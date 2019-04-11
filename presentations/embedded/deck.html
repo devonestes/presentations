@@ -1,0 +1,142 @@
+---
+layout: presentation
+title: Embedded Application Development (for Web Developers)
+permalink: /embedded_development/
+---
+
+# Embedded Application Development
+#### (for Web Developers)
+
+???
+My name is Devon...
+
+For pretty much all of my career I've been a web developer...
+
+For the last 4 years I've been doing Elixir/Erlang...
+
+Last year, I was contacted by a company who wanted to hire me to work on their
+applications. One was something I had seen several times before - a
+high-throughput GraphQL API.
+
+But the second was something new to me - an embedded application.
+
+This company was building Point of Sale systems for restaurants and retail
+chains in the US, and those POS systems communicated back to that central API
+for all kinds of helpful things for owners and operators of these retail
+locations.
+
+And powering these POS systems was embedded software, running on dozens of
+different kinds of hardware in hundreds of locations across a _very_ large
+country. A huge selling point for this company is that their software would be
+able to run on your existing POS hardware, and that was a huge challenge.
+
+To put this challenge into web development terms, imagine you're building a web
+app that needs to run _perfectly_ in every web browser that's been used over
+the last 20 years - and yes, I mean everything from Internet Explorer 5 to
+today!
+
+Writing software for one hardware platform isn't so bad, but writing software
+for dozens of them - not to mention drivers for dozens of possible peripherals
+- is really quite hard!
+
+---
+
+# What are embedded applications?
+
+???
+Nowadays, just about everything we have has some sort of software in it. It can
+be really tiny software that doesn't run on any sort of OS, or it can be massive
+applications that run on some form of OS (often a version of Linux for these
+huge embedded systems).
+
+---
+
+# Picture of the boys' clock
+
+???
+This is software!
+
+This is the clock that wakes my kids up in the morning. It's cute, and it lights
+up green when it's time for them to come out of their room.
+
+I know that it has software in it because sometimes, when my kids wake up early
+and don't want to wait for the light to turn green, they'll open up the back
+and start smashing all the buttons to try and make it turn green earlier.
+
+Unfortunatley for them, all this does is make the thing freeze up and I need to
+turn it off and back on again to make it work again.
+
+So, yeah, that's software for you!
+
+---
+
+# Picture of a Tesla
+
+???
+This is also now software!
+
+Tesla famously runs millions of lines of code through their cars, and that
+software is _critical_ to the operation of their cars.
+
+---
+
+# The two types of embedded software
+
+???
+Embedded software can be divided up into two broad categories.
+
+--
+
+* Software that gets updated
+
+--
+
+* Software that doesn't get updated
+
+???
+When you think about it, this distintion is _huge_, and for many reasons.
+
+If you're shipping software today, can you even imagine what it would be like if
+you were only able to ship once? So, every bug that you ship never gets fixed?
+No new features are added after you ship? It sure raises the stakes when it
+comes to getting things right.
+
+The two examples I just gave illustrate the differences between these two types
+of embedded devices. That clock doesn't get any updates. That bug that they
+shipped where pushing a certain combination of buttons in a certain amount of
+time makes the thing freeze will never get fixed. That's just how that thing
+works at this point.
+
+Tesla, however, can also change the code in their cars with the push of a
+button, as they do occasionally before natural disasters in the US so they can
+give folks extra range and get out of harm's way.
+
+But this raises other concerns, especially around security and privacy.
+
+---
+
+# IoT is here to stay
+
+???
+What's for sure, though, is that right now a great number of our posessions have
+software in them, and over time more and more of them will also have more, and
+more complicated, software. There's no putting that genie back in the bottle.
+
+---
+
+# Picture of StarCraft box
+
+Now, the web is surely here to stay as well. But, I'm old enough to remember a
+time when I was realy excited to go down to Staples and pick up the newest cool
+video game, which came in a physical box, with a physical CD that I would put in
+my computer and then spend 10 minutes waiting for it to install before I could
+play it.
+
+Basically, what I'm trying to say is - things change, and what do I really know
+about what the future holds?
+
+And so, what I'm going to go over today is how I - as someone who spent his
+entire career essentially putting spreadsheets on the internet in the form of
+web applications - went through the process of learning about developing
+embedded systems and how that changed my development style both for embedded
+_and_ web applications!

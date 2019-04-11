@@ -11,7 +11,5 @@ h1, h2, h3 {
 
 img {
   max-height: 600px;
-  max-width: 800px;
-  display: block;
-  margin: 0 auto;
+  max-width: 750px;
 }
