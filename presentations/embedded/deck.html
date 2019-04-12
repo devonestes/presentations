@@ -140,3 +140,77 @@ entire career essentially putting spreadsheets on the internet in the form of
 web applications - went through the process of learning about developing
 embedded systems and how that changed my development style both for embedded
 _and_ web applications!
+
+---
+
+# Design
+
+???
+Let's start from the beginning. Before the product is even built, how do you
+design it? You can't rapidly iterate on designs because you can't control if
+users actually update or not.
+
+You build and test mockups and do lots of user testing. Alpha and Beta users are
+crucial.
+
+Design sprints are really helpful here.
+
+Depending on your application, there's almost no way to do anything other that
+some version of Waterfall. This doesn't have to be a bad thing! But, the more
+you can develop ways to make getting updates to your customers possible, the
+better.
+
+---
+
+# Development
+
+???
+Ok, so we have some idea of what we want, but now we need to build it. What do
+we need to focus on?
+
+Robustness, fault tolerence are extremely important. Turn it off and on again is
+a terrible solution!
+
+You're almost certainly going to have persistant local state in these
+applications, so getting that right is really important. This makes shared
+mutable state generally a bad idea.
+
+You're likely going to be running on very small hardware with limited resources.
+Performance might be something you care about, but you definitely can't run out
+of memory - this rules out Ruby.
+
+---
+
+# Testing
+
+???
+You can't test in production when you don't have access to production devices.
+
+Property testing is extremely helpful.
+
+A strong type system is really helpful.
+
+---
+
+# Debugging
+
+???
+Running an application on dozens of different hardware platforms is really
+tricky to get right! How do you debug when things go wrong?
+
+When it comes to debugging, nothing comes close to the helpfulness of connecting
+to a running OTP application.
+
+Even finding out if you have bugs can be really tricky since you might need
+users to report them, and they often don't.
+
+---
+
+# Security
+
+???
+You need to be able to do this without opening up your users to huge security
+issues. Especially in this case, where money and financial information is
+involved and it's connected to the internet, we needed to be rock solid.
+
+Limit your use of dependencies - this basically rules out JavaScript.
