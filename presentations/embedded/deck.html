@@ -150,15 +150,16 @@ Let's start from the beginning. Before the product is even built, how do you
 design it? You can't rapidly iterate on designs because you can't control if
 users actually update or not.
 
+Getting your product right to meet your users' needs is a really tricky process,
+and not being able to rapidly iterate makes it even more difficult!
+
 You build and test mockups and do lots of user testing. Alpha and Beta users are
 crucial.
 
-Design sprints are really helpful here.
-
-Depending on your application, there's almost no way to do anything other that
-some version of Waterfall. This doesn't have to be a bad thing! But, the more
-you can develop ways to make getting updates to your customers possible, the
-better.
+=======================================================================
+Design sprints are really helpful here (5 minutes on design sprints, links to
+more resources).
+=======================================================================
 
 ---
 
@@ -179,16 +180,50 @@ You're likely going to be running on very small hardware with limited resources.
 Performance might be something you care about, but you definitely can't run out
 of memory - this rules out Ruby.
 
+=======================================================================
+Make the pitch that Erlang/Elixir is a great choice for embedded development
+because of this (main section - 5 minutes).
+
+Turns out that a language that was designed exclusively for fault-tolerent
+embedded software is really good for writing fault-tolerent embedded software!
+
+It's also good for lots of other things, but this is one of the rare use cases
+where I'd say that some of the other languages in its class are left totally in
+the dust in terms of features.
+=======================================================================
+
 ---
 
 # Testing
 
 ???
+How many of you have some sort of monitoring/observability platform that allows
+you to monitor production systems?
+
+How many of you test in production?
+
+I have some bad news for you if you put your hand down after the first question
+- you're testing in production! If you had total confidence that your
+application was working 100% correctly in all situations, then
+monitoring/observability is unneeded.
+
 You can't test in production when you don't have access to production devices.
+This makes replicating production-like usage of your application extremely
+important.
 
-Property testing is extremely helpful.
+Show picture of Facebook mobile testing:
+https://mondrian.mashable.com/uploads%252Fcard%252Fimage%252F143488%252Fiphones.jpg%252Ffit-in__1200x9600.jpg?signature=IX_AiPfrRuxCoP5zgDxTHYeEqW0=&source=https%3A%2F%2Fblueprint-api-production.s3.amazonaws.com
 
-A strong type system is really helpful.
+"In each rack, above the tangle of cables and phones, sits a camera, recording
+every onscreen movement in case a developer needs to review a specific hiccup."
+
+A strong type system is really helpful. This gives us a baseline of confidence
+in the "correctness" of your program. Again, if deploying is difficult - or
+impossible - then you really want to find bugs before your users do.
+
+=====================================
+Property testing is extremely helpful (main section - 5 minutes)
+=====================================
 
 ---
 
@@ -204,13 +239,35 @@ to a running OTP application.
 Even finding out if you have bugs can be really tricky since you might need
 users to report them, and they often don't.
 
+=================================================
+Show a little bit of the power of the observer (main section - 5 minutes)
+=================================================
+
 ---
 
 # Security
 
 ???
+The "S" in IoT stands for security.
+
+I know what many of you might have been thinking a bit. "Why isn't he mentioning
+C or C++ in a talk on embedded software?"
+
+https://www.coreinfrastructure.org/programs/census-project/
+Main Language: If the project’s main language is C or C++, add 2 points.
+
+With great power comes great buffer overflow bugs - Spiderman meme.
+
 You need to be able to do this without opening up your users to huge security
-issues. Especially in this case, where money and financial information is
+issues. Especially in my case, where money and financial information is
 involved and it's connected to the internet, we needed to be rock solid.
+
+Do you really want to run code written by strangers on the internet on your
+users' devices?
+
+I love that we trust the OSS community as much as we do, but this is potentially
+dangerous. There are a whole host of possible attack vectors, and the
+combinatorial explosion of possible attack targets makes using dependencies a
+risky business.
 
 Limit your use of dependencies - this basically rules out JavaScript.
