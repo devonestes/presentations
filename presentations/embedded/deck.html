@@ -47,7 +47,13 @@ for dozens of them - not to mention drivers for dozens of possible peripherals
 Nowadays, just about everything we have has some sort of software in it. It can
 be really tiny software that doesn't run on any sort of OS, or it can be massive
 applications that run on some form of OS (often a version of Linux for these
-huge embedded systems).
+huge embedded systems). But my definition of embedded software is some sort of
+application that is deeply, deeply tied to some sort of hardware.
+
+Just because some piece of software doesn't run on the web doesn't mean it's
+embedded software. Mobile and desktop applications certainly aren't embedded
+applications, but you could argue that the operating systems that these
+applications run on _are_ examples of embedded software.
 
 ---
 
@@ -83,7 +89,8 @@ software is _critical_ to the operation of their cars.
 # The two types of embedded software
 
 ???
-Embedded software can be divided up into two broad categories.
+At the very highest level, embedded software can be divided up into two broad
+categories.
 
 --
 
@@ -107,11 +114,12 @@ shipped where pushing a certain combination of buttons in a certain amount of
 time makes the thing freeze will never get fixed. That's just how that thing
 works at this point.
 
-Tesla, however, can also change the code in their cars with the push of a
-button, as they do occasionally before natural disasters in the US so they can
-give folks extra range and get out of harm's way.
+Tesla, however, can change the code in their cars with the push of a button, as
+they do occasionally before natural disasters in the US so they can give folks
+extra range and get out of harm's way.
 
-But this raises other concerns, especially around security and privacy.
+But this ability to connect remotely to these embedded applications raises other
+concerns, especially around security and privacy.
 
 ---
 
@@ -119,8 +127,9 @@ But this raises other concerns, especially around security and privacy.
 
 ???
 What's for sure, though, is that right now a great number of our posessions have
-software in them, and over time more and more of them will also have more, and
-more complicated, software. There's no putting that genie back in the bottle.
+software in them, and over time more and more of them will also have software in
+them, and that over time this software will get more complicated. There's no
+putting that genie back in the bottle.
 
 ---
 
@@ -143,12 +152,28 @@ _and_ web applications!
 
 ---
 
+# Picture of Mary Poppins "Let's start at the very beginning"
+
+---
+
+# Picture of Mary Poppins "A very good place to start"
+
+---
+
+# Picture of Mary Poppins "When you read, you begin with A,B,C"
+
+---
+
+# Picture of Mary Poppins "When you write embedded software you begin with
+product design"
+
+---
+
 # Design
 
 ???
-Let's start from the beginning. Before the product is even built, how do you
-design it? You can't rapidly iterate on designs because you can't control if
-users actually update or not.
+Before the product is even built, how do you design it? You can't rapidly
+iterate on designs because you can't control if users actually update or not.
 
 Getting your product right to meet your users' needs is a really tricky process,
 and not being able to rapidly iterate makes it even more difficult!
