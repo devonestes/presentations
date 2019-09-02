@@ -1,0 +1,60 @@
+---
+layout: presentation
+title: Comparing Concurrency Patterns in Elixir and Erlang
+permalink: /elixir_erlang_concurrency/
+---
+
+# Comparing Common Concurrency Patters
+#### in Elixir and Erlang
+
+???
+My name is Devon...
+
+One of the things that many people love about the BEAM is the wonderful support
+for concurrent computation. Not just concurrent, but truly parallel. If you want
+to peg all of your CPU cores at 100%, you can easily do that thanks to the BEAM.
+
+But the thing is, you still need to design those systems. And that's what we're
+going to be talking about today. Specifically, we're going to be looking at two
+open source examples of some concurrent computation.
+
+---
+
+# Benchee vs. ExUnit
+
+???
+
+Both ExUnit and Benchee have some parallel computation involved in their
+execution. Specifically, both of these problems are - and I'm not making this
+term up here - embarassingly parallel. This term is for problems that can be
+executed entirely in parallel without any communication between the processes.
+
+---
+
+# Show picture of squares in squares
+
+???
+
+This basically means that we have a problem that can be broken down into smaller
+sub-problems. And occasionally those sub-problems can also be broken down
+further as well. And off of these divisions can be run in parallel. You may of
+heard of map-reduce - well, that's sort of what this is.
+
+---
+
+# Parallel Map Reduce vs. Event Manager
+
+???
+
+Benchee and ExUnit handle this basic problem in two ways. We're going to call
+those two options Parallel Map Reduce and an Event Manager. Each of these
+implementations has some pros and cons - that's like the story of all software,
+right? It's all about tradeoffs.
+
+So, let's look at these two implemenations, discuss the tradeoffs, and hopefully
+we'll have a deeper understanding of these two options so you can make some good
+choices when it comes time to implement something like this yourselves.
+
+---
+
+# Parallel Map Reduce
