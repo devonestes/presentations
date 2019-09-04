@@ -58,3 +58,198 @@ choices when it comes time to implement something like this yourselves.
 ---
 
 # Parallel Map Reduce
+
+???
+
+The simpler of the two is the parallel map reduce that we do in Benchee. Looking
+at the actual code, it's pretty simple.
+
+---
+
+@spec map(Enum.t(), fun) :: list
+def map(collection, func) do
+  collection
+  |> Enum.map(&Task.async(fn -> func.(&1) end))
+  |> Enum.map(&Task.await(&1, :infinity))
+end
+
+???
+
+We have a collection here that we can map over, and we have a function that is
+going to be applied for each element in the collection. We're using the
+wonderful Task module for this to run these operations in parallel, and then
+waiting for all of them to finish.
+
+But I want to go one level deeper here, because I think it's kind of important
+to know what's actually going on in those Task functions.
+
+---
+
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+
+def await(ref, timeout) do
+  receive do
+    {^ref, value} -> value
+  after timeout
+    raise TimeoutError
+  end
+end
+
+???
+
+This is an extremely simplified version of what's going on in those functions,
+but the important parts are still there. The most important thing to see here is
+that while we _are_ doing all of the computation in parallel, we're blocking
+until all of the functions that we're processing in parallel finish.
+
+---
+
+Parallel.map([1, 20, 2, 3], &Process.sleep/1)
+
+???
+
+So, if we do something like this, we will get one message in one second, and
+then our process won't receive the third and fourth messages until after that
+second message is received. It'll be in the mailbox for sure, but it won't be
+received by the process because we're receiving things in specific order there.
+
+---
+
+# Task.yield and Task.async_stream are cool, too
+
+???
+
+So this is one important thing to consider here. When we're mapping over the
+elements in that list, we're blocking on each element in order. This is nice and
+simple, but it does have some drawbacks. The Task module is rather simple and
+really cool, and it's a super example of OTP if that's something that you're
+still a little confused by. There's supervision and all that stuff going on
+there, so I'd really encourage y'all to check itout.
+
+But this stuff, as cool as it is, wouldn't work for ExUnit. Let's look at why.
+
+---
+
+def run() do
+  EventManager.start()
+  EventManager.suite_started()
+  loop(:async)
+  EventManager.suite_finished()
+  results = EventManager.get_results()
+  EventManger.stop()
+  results
+end
+
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, module} ->
+      spawn(fn -> run_module(module) end) # non-blocking
+      loop(:async)
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+
+def loop(:sync) do
+  case wait_for_module(:sync) do
+    {:ok, module} ->
+      run_module(module) # blocking
+      loop(:sync)
+    {:error, :no_more_async_modules} ->
+      :ok
+  end
+end
+
+def run_module(module) do
+  EventManager.module_started(module)
+
+  module
+  |> get_tests()
+  |> Enum.map(&run_test/1)
+
+  EventManager.module_finished(module)
+end
+
+def run_test(test) do
+  EventManager.test_started(test)
+  result = run(test)
+  EventManager.test_finished(result)
+end
+
+???
+
+Ok, so this is an extremely simple version of how ExUnit runs your tests. But,
+you'll see here that we're running some modules in parallel, and others in
+sequence. We have that EventManager that seems to be really important. What we
+have here is a lot of flexibility, which is awesome. It's also far more
+complicated than what we had before. Could we simplify this?
+
+---
+
+def run() do
+  load_modules()
+  |> Parallel.map(&run_module/1)
+  |> format_results()
+end
+
+def run_module(module) do
+  module
+  |> get_tests()
+  |> Enum.map(&run_test/1)
+end
+
+???
+
+This is much simpler! It will load all of our modules at once, and then it will
+run all of those modules in parallel. This is super easy, but it doesn't
+actually do what ExUnit needs, and that's why they use that EventManager
+pattern.
+
+The EventManager offers flexiblity to do really cool stuff, including mixing
+parallel and serial computation. It's basically a GenServer that's holding all
+the state for the process and listening to multiple possible messages. When we
+do parallel map that's such a simple and kind of dumb solution, but it's also
+really a great option for most cases where you need parallel computation.
+
+But the EventManager handles that complexity quite well by providing a neat
+interface and hiding all of the complexity from its caller. Looking at my
+simplified version of ExUnit's runner there, we can get a pretty good idea of
+what's going on in that module without having to look at the implementation.
+
+I also really like that the EventManager here can sort of be seen as a fancy
+state machine! I guess it's like some sort of state machine that's made up of
+other state machines (because recursion is everywhere in nature), but that - to
+me at least - makes a lot of sense conceptually and I think aides both in
+understanding this problem and in maintaining this code. As someone who has done
+a fair amount of work on this part of ExUnit over the years, it was super simple
+for me to dive in and make those changes, so kudos to the folks that designed
+that originally and expanded on it over the years.
+
+---
+
+# The tradeoffs
+
+???
+
+And so, like most things, we come down to tradeoffs. And like most tradeoffs,
+we're trading simplicity for flexibility. The simplest thing is indeed still
+quite good, and can even be improved rather easily if you like.
+
+I would strongly encourage you all to start with something really simple like a
+parallel map when you're adding concurrency to your applictions. 99 times out of
+100 that's probably going to get you pretty far.
+
+But, the minute that simple pattern stops working for you, I strongly encourage
+you to create some sort of managed interface for your concurent operation. Try
+thinking about your operation as a state machine. Ask yourself questions like
+"Where do I start? What states can this process be in? What are the triggers
+for moving between states?" I find that if you ask yourself these kinds of
+questions, a really elegant and natural interface for your manager just sort of
+falls into place.
+
+State machines are really nifty, ya know?!
