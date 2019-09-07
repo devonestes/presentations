@@ -3,8 +3,13 @@ layout: presentation
 title: Comparing Concurrency Patterns in Elixir and Erlang
 permalink: /elixir_erlang_concurrency/
 ---
+layout: true
+class: middle
+.watermark[@devoncestes]
+
+---
+
 class: center, middle
-.watermark[Devon Estes - @devoncestes - CBL Berlin 2019]
 
 # Comparing Common Concurrency Patterns
 ## in Elixir and Erlang
@@ -22,7 +27,6 @@ open source examples of some concurrent computation.
 
 ---
 class: center, middle
-.watermark[Devon Estes - @devoncestes - CBL Berlin 2019]
 
 # Benchee vs. ExUnit
 
@@ -35,7 +39,6 @@ executed entirely in parallel without any communication between the processes.
 
 ---
 class: center, middle
-.watermark[Devon Estes - @devoncestes - CBL Berlin 2019]
 
 ![Recursion](/assets/images/recursion.gif)
 
@@ -73,6 +76,8 @@ at the actual code, it's pretty simple.
 
 ---
 
+class: middle
+
 ```elixir
 @spec map(Enum.t(), fun) :: list
 def map(collection, func) do
@@ -93,6 +98,8 @@ But I want to go one level deeper here, because I think it's kind of important
 to know what's actually going on in those Task functions.
 
 ---
+
+class: middle
 
 ```elixir
 def async(func) do
@@ -131,6 +138,51 @@ So, if we do something like this, we will get one message in one second, and
 then our process won't receive the third and fourth messages until after that
 second message is received. It'll be in the mailbox for sure, but it won't be
 received by the process because we're receiving things in specific order there.
+
+---
+class: middle
+
+```elixir
+def async(func, node \\ Node.self()) do
+  ref = make_ref()
+  me = self()
+  Node.spawn(node, fn -> send(me, {ref, func()}) end)
+  ref
+end
+
+def await(ref, timeout) do
+  receive do
+    {^ref, value} -> value
+
+  after timeout
+    raise TimeoutError
+  end
+end
+
+def map(collection, func) do
+  node_stream = Stream.cycle(Node.list())
+
+  collection
+  |> Stream.zip(node_stream)
+  |> Stream.map(fn {elem, node} ->
+       async(fn -> func.(elem) end, node)
+     end)
+  |> Enum.map(&await(&1, :infinity))
+end
+```
+
+???
+
+And this is only tangentially related, but I always like showing it because it's
+just so damn cool. Before what we had was an implementation that was using 100%
+of the CPU cycles on our node. But now, what we have here with literally one
+line changed, and only barely so, is a distributed implementation that will use
+100% of the CPU cycles on every node in our cluster. Going from a single machine
+to a distributed map-reduce is just that easy!
+
+This is also where I have to put the disclaimer that handling all the myriad
+failure possiblities with distributed systems is extremely complicated, and that
+this won't reliably work in production. But still, it's cool, right?!
 
 ---
 
