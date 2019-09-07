@@ -3,9 +3,11 @@ layout: presentation
 title: Comparing Concurrency Patterns in Elixir and Erlang
 permalink: /elixir_erlang_concurrency/
 ---
+class: center, middle
+.watermark[Devon Estes - @devoncestes - CBL Berlin 2019]
 
-# Comparing Common Concurrency Patters
-#### in Elixir and Erlang
+# Comparing Common Concurrency Patterns
+## in Elixir and Erlang
 
 ???
 My name is Devon...
@@ -19,6 +21,8 @@ going to be talking about today. Specifically, we're going to be looking at two
 open source examples of some concurrent computation.
 
 ---
+class: center, middle
+.watermark[Devon Estes - @devoncestes - CBL Berlin 2019]
 
 # Benchee vs. ExUnit
 
@@ -30,15 +34,18 @@ term up here - embarassingly parallel. This term is for problems that can be
 executed entirely in parallel without any communication between the processes.
 
 ---
+class: center, middle
+.watermark[Devon Estes - @devoncestes - CBL Berlin 2019]
 
-# Show picture of squares in squares
+![Recursion](/assets/images/recursion.gif)
 
 ???
 
 This basically means that we have a problem that can be broken down into smaller
 sub-problems. And occasionally those sub-problems can also be broken down
-further as well. And off of these divisions can be run in parallel. You may of
-heard of map-reduce - well, that's sort of what this is.
+further as well. And all of these divisions can be run in parallel. You may of
+heard of something called map-reduce before spoken about in this sense - well,
+that's sort of what this is.
 
 ---
 
@@ -66,12 +73,14 @@ at the actual code, it's pretty simple.
 
 ---
 
+```elixir
 @spec map(Enum.t(), fun) :: list
 def map(collection, func) do
   collection
   |> Enum.map(&Task.async(fn -> func.(&1) end))
   |> Enum.map(&Task.await(&1, :infinity))
 end
+```
 
 ???
 
@@ -85,6 +94,7 @@ to know what's actually going on in those Task functions.
 
 ---
 
+```elixir
 def async(func) do
   ref = make_ref()
   me = self()
@@ -99,17 +109,21 @@ def await(ref, timeout) do
     raise TimeoutError
   end
 end
+```
 
 ???
 
 This is an extremely simplified version of what's going on in those functions,
 but the important parts are still there. The most important thing to see here is
 that while we _are_ doing all of the computation in parallel, we're blocking
-until all of the functions that we're processing in parallel finish.
+this process with those receive blocks until all of the functions that we're
+processing in parallel finish.
 
 ---
 
+```elixir
 Parallel.map([1, 20, 2, 3], &Process.sleep/1)
+```
 
 ???
 
@@ -120,7 +134,7 @@ received by the process because we're receiving things in specific order there.
 
 ---
 
-# Task.yield and Task.async_stream are cool, too
+# `Task.yield` and `Task.async_stream` are cool, too
 
 ???
 
@@ -135,6 +149,40 @@ But this stuff, as cool as it is, wouldn't work for ExUnit. Let's look at why.
 
 ---
 
+```elixir
+def run() do
+  # ...
+end
+
+def loop(:async) do
+  # ...
+end
+
+def loop(:sync) do
+  # ...
+end
+
+def run_module(module) do
+  # ...
+end
+
+def run_test(test) do
+  # ...
+end
+```
+
+???
+
+Ok, so this is an extremely simple version of how ExUnit runs your tests. But,
+you'll see here that we're running some modules in parallel, and others in
+sequence. We have that EventManager that seems to be really important. What we
+have here is a lot of flexibility, which is awesome. It's also far more
+complicated than what we had before. Could we simplify this?
+
+---
+
+
+```elixir
 def run() do
   EventManager.start()
   EventManager.suite_started()
@@ -180,6 +228,7 @@ def run_test(test) do
   result = run(test)
   EventManager.test_finished(result)
 end
+```
 
 ???
 
@@ -191,6 +240,7 @@ complicated than what we had before. Could we simplify this?
 
 ---
 
+```elixir
 def run() do
   load_modules()
   |> Parallel.map(&run_module/1)
@@ -202,6 +252,7 @@ def run_module(module) do
   |> get_tests()
   |> Enum.map(&run_test/1)
 end
+```
 
 ???
 
