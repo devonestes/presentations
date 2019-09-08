@@ -45,13 +45,6 @@ class: center, middle
 # &nbsp;
 
 ---
-
-class: center, middle
-
-# ~~Benchee vs. ExUnit~~
-# &nbsp;
-
----
 class: center, middle
 
 # ~~Benchee vs. ExUnit~~
@@ -77,14 +70,13 @@ The simpler of the two is the parallel map reduce that we do in Benchee. Looking
 at the actual code, it's pretty simple.
 
 ---
+class: padding
 
-class: middle
+.center[
+# Parallel Map
+]
 
-<div class="center">
-  <h1>Parallel Map</h1>
-</div>
-
-```elixir
+```
 @spec map(Enum.t(), fun) :: list
 def map(collection, func) do
   collection
@@ -104,22 +96,53 @@ But I want to go one level deeper here, because I think it's kind of important
 to know what's actually going on in those Task functions.
 
 ---
+class: padding
 
-class: middle
+.center[
+# Parallel Map
+]
 
-<div class="center">
-  <h1>Basic async & await</h1>
-</div>
+```
+@spec map(Enum.t(), fun) :: list
+def map(collection, func) do
+  collection
+  |> Enum.map(&`Task.async`(fn -> func.(&1) end))
+  |> Enum.map(&`Task.await`(&1, :infinity))
+end
+```
 
-```elixir
+???
+
+We have a collection here that we can map over, and we have a function that is
+going to be applied for each element in the collection. We're using the
+wonderful Task module for this to run these operations in parallel, and then
+waiting for all of them to finish.
+
+But I want to go one level deeper here, because I think it's kind of important
+to know what's actually going on in those Task functions.
+
+
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
 def async(func) do
   ref = make_ref()
   me = self()
   spawn(fn -> send(me, {ref, func()}) end)
   ref
 end
+```
 
+--
 
+```
 def await(ref, timeout \\ :infinity) do
   receive do
     {^ref, value} -> value
@@ -137,32 +160,36 @@ this process with those receive blocks until all of the functions that we're
 processing in parallel finish.
 
 ---
-class: middle
+class: padding
+
+.hidden[
+# _
+]
 
 ```
 me = self()
 
 fun = fn seconds ->
-  Process.sleep(seconds * 1000)                       
-  send(me, Time.utc_now().second
+  Process.sleep(seconds * 1000) # Simulate some expensive work
+  send(me, Time.utc_now().second)
 end
 ```
 
----
-class: middle
+--
 
-```elixir
-me = self()
-
-fun = fn seconds ->
-  Process.sleep(seconds * 1000)                      
-  send(me, Time.utc_now().second
-end
-
+```
 Time.utc_now().second             #=> 47
+```
 
+--
+
+```
 Parallel.map([1, 2, 3, 1], fun)   #=> [47, 48, 51, 47]
+```
 
+--
+
+```
 Time.utc_now().second             #=> 51
 ```
 
@@ -174,6 +201,11 @@ second message is received. It'll be in the mailbox for sure, but it won't be
 received by the process because we're receiving things in specific order there.
 
 ---
+class: padding
+
+.center[
+# Distributed Parallel Map
+]
 
 ```
 def map(collection, func) do
@@ -186,11 +218,33 @@ def map(collection, func) do
      end)
   |> Enum.map(&await(&1, :infinity))
 end
+```
 
-def async(func`, node \\ Node.self()`) do
+???
+
+And this is only tangentially related, but I always like showing it because it's
+just so damn cool. Before what we had was an implementation that was using 100%
+of the CPU cycles on our node. But now, what we have here with literally one
+line changed, and only barely so, is a distributed implementation that will use
+100% of the CPU cycles on every node in our cluster. Going from a single machine
+to a distributed map-reduce is just that easy!
+
+This is also where I have to put the disclaimer that handling all the myriad
+failure possiblities with distributed systems is extremely complicated, and that
+this won't reliably work in production. But still, it's cool, right?!
+
+---
+class: padding
+
+.center[
+# Distributed Async & Await
+]
+
+```
+def async(func, `node \\ Node.self()`) do
   ref = make_ref()
   me = self()
-  `Node.spawn(node, fn -> send(me, {ref, func()}) end)`
+  `Node.spawn(node`, fn -> send(me, {ref, func()}) end)
   ref
 end
 
@@ -215,9 +269,13 @@ This is also where I have to put the disclaimer that handling all the myriad
 failure possiblities with distributed systems is extremely complicated, and that
 this won't reliably work in production. But still, it's cool, right?!
 
----
 
-# `Task.yield` and `Task.async_stream` are cool, too
+
+---
+class: center, middle
+
+# `Task.yield`
+# `Task.async_stream`
 
 ???
 
@@ -232,7 +290,7 @@ But this stuff, as cool as it is, wouldn't work for ExUnit. Let's look at why.
 
 ---
 
-```elixir
+```
 def run() do
   # ...
 end
@@ -367,6 +425,23 @@ that originally and expanded on it over the years.
 ---
 
 # The tradeoffs
+.cols[
+.fifty[
+left
+
+- a
+- b
+- c
+]
+
+.fifty[
+right
+
+- a
+- b
+- c
+]
+]
 
 ???
 

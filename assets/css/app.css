@@ -16,6 +16,11 @@ h1, h2, h3 {
   background-color: #F0F0F0 !important;
 }
 
+.remark-code {
+  width: fit-content;
+  font-size: 20px;
+}
+
 .remark-slide-content {
   background-color: #F0F0F0;
 }
@@ -37,8 +42,22 @@ img {
     padding-left: 25px;
 }
 
-.elixir {
-  width: fit-content;
-  margin: 0 auto;
-  font-size: 20px;
+.cols {
+  display: flex;
+}
+
+.fifty {
+  flex: 50%;
+}
+
+.padding {
+  padding: 50px 200px;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.remark-code-span-highlighted {
+  padding: 0;
 }
