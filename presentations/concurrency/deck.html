@@ -4,7 +4,8 @@ title: Comparing Concurrency Patterns in Elixir and Erlang
 permalink: /elixir_erlang_concurrency/
 ---
 layout: true
-.watermark[@devoncestes]
+.watermark-left[@devoncestes]
+.watermark-middle[CBL Berlin 2019]
 
 ---
 
@@ -178,19 +179,19 @@ end
 --
 
 ```
-Time.utc_now().second             #=> 47
+Time.utc_now().second             #=> 48
 ```
 
 --
 
 ```
-Parallel.map([1, 2, 3, 1], fun)   #=> [47, 48, 51, 47]
+Parallel.map([1, 2, 3, 1], fun)   #=> [48, 49, 50, 48]
 ```
 
 --
 
 ```
-Time.utc_now().second             #=> 51
+Time.utc_now().second             #=> 50
 ```
 
 ???
@@ -289,6 +290,11 @@ there, so I'd really encourage y'all to check itout.
 But this stuff, as cool as it is, wouldn't work for ExUnit. Let's look at why.
 
 ---
+class: padding
+
+.center[
+# Event Manager
+]
 
 ```
 def run() do
@@ -303,7 +309,7 @@ def loop(:sync) do
   # ...
 end
 
-def run_module(module) do
+def run_module(mod) do
   # ...
 end
 
@@ -321,24 +327,40 @@ have here is a lot of flexibility, which is awesome. It's also far more
 complicated than what we had before. Could we simplify this?
 
 ---
+class: padding
 
+.hidden[
+# _
+]
 
-```elixir
+```
 def run() do
   EventManager.start()
+
   EventManager.suite_started()
   loop(:async)
   EventManager.suite_finished()
+
   results = EventManager.get_results()
   EventManger.stop()
   results
 end
+```
 
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
 def loop(:async) do
   case wait_for_module(:async) do
-    {:ok, module} ->
-      spawn(fn -> run_module(module) end) # non-blocking
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
       loop(:async)
+
     {:error, :no_more_async_modules} ->
       loop(:sync)
   end
@@ -346,14 +368,24 @@ end
 
 def loop(:sync) do
   case wait_for_module(:sync) do
-    {:ok, module} ->
-      run_module(module) # blocking
+    {:ok, mod} ->
+      run_module(mod)                    # blocking
       loop(:sync)
-    {:error, :no_more_async_modules} ->
+
+    {:error, :no_more_modules} ->
       :ok
   end
 end
+```
 
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
 def run_module(module) do
   EventManager.module_started(module)
 
@@ -363,7 +395,9 @@ def run_module(module) do
 
   EventManager.module_finished(module)
 end
-
+```
+--
+```
 def run_test(test) do
   EventManager.test_started(test)
   result = run(test)
@@ -380,8 +414,13 @@ have here is a lot of flexibility, which is awesome. It's also far more
 complicated than what we had before. Could we simplify this?
 
 ---
+class: padding
 
-```elixir
+.hidden[
+# _
+]
+
+```
 def run() do
   load_modules()
   |> Parallel.map(&run_module/1)
@@ -423,11 +462,24 @@ for me to dive in and make those changes, so kudos to the folks that designed
 that originally and expanded on it over the years.
 
 ---
+class: middle, center
 
+# State Machines are great!
+
+### `:gen_statem`
+### `:gen_event`
+
+---
+
+.center[
 # The tradeoffs
+]
+
 .cols[
 .fifty[
-left
+.center[
+# Parallel Map
+]
 
 - a
 - b
@@ -435,7 +487,9 @@ left
 ]
 
 .fifty[
-right
+.center[
+# Event Manager
+]
 
 - a
 - b
