@@ -4,7 +4,6 @@ title: Comparing Concurrency Patterns in Elixir and Erlang
 permalink: /elixir_erlang_concurrency/
 ---
 layout: true
-class: middle
 .watermark[@devoncestes]
 
 ---
@@ -28,18 +27,6 @@ open source examples of some concurrent computation.
 ---
 class: center, middle
 
-# Benchee vs. ExUnit
-
-???
-
-Both ExUnit and Benchee have some parallel computation involved in their
-execution. Specifically, both of these problems are - and I'm not making this
-term up here - embarassingly parallel. This term is for problems that can be
-executed entirely in parallel without any communication between the processes.
-
----
-class: center, middle
-
 ![Recursion](/assets/images/recursion.gif)
 
 ???
@@ -52,9 +39,30 @@ that's sort of what this is.
 
 ---
 
-# Parallel Map Reduce vs. Event Manager
+class: center, middle
+
+# Benchee vs. ExUnit
+# &nbsp;
+
+---
+
+class: center, middle
+
+# ~~Benchee vs. ExUnit~~
+# &nbsp;
+
+---
+class: center, middle
+
+# ~~Benchee vs. ExUnit~~
+# Parallel Map vs. Event Manager
 
 ???
+
+Both ExUnit and Benchee have some parallel computation involved in their
+execution. Specifically, both of these problems are - and I'm not making this
+term up here - embarassingly parallel. This term is for problems that can be
+executed entirely in parallel without any communication between the processes.
 
 Benchee and ExUnit handle this basic problem in two ways. We're going to call
 those two options Parallel Map Reduce and an Event Manager. Each of these
@@ -65,18 +73,16 @@ So, let's look at these two implemenations, discuss the tradeoffs, and hopefully
 we'll have a deeper understanding of these two options so you can make some good
 choices when it comes time to implement something like this yourselves.
 
----
-
-# Parallel Map Reduce
-
-???
-
 The simpler of the two is the parallel map reduce that we do in Benchee. Looking
 at the actual code, it's pretty simple.
 
 ---
 
 class: middle
+
+<div class="center">
+  <h1>Parallel Map</h1>
+</div>
 
 ```elixir
 @spec map(Enum.t(), fun) :: list
@@ -101,6 +107,10 @@ to know what's actually going on in those Task functions.
 
 class: middle
 
+<div class="center">
+  <h1>Basic async & await</h1>
+</div>
+
 ```elixir
 def async(func) do
   ref = make_ref()
@@ -109,11 +119,11 @@ def async(func) do
   ref
 end
 
-def await(ref, timeout) do
+
+def await(ref, timeout \\ :infinity) do
   receive do
     {^ref, value} -> value
-  after timeout
-    raise TimeoutError
+    after timeout -> {:error, :timeout}
   end
 end
 ```
@@ -127,9 +137,33 @@ this process with those receive blocks until all of the functions that we're
 processing in parallel finish.
 
 ---
+class: middle
+
+```
+me = self()
+
+fun = fn seconds ->
+  Process.sleep(seconds * 1000)                       
+  send(me, Time.utc_now().second
+end
+```
+
+---
+class: middle
 
 ```elixir
-Parallel.map([1, 20, 2, 3], &Process.sleep/1)
+me = self()
+
+fun = fn seconds ->
+  Process.sleep(seconds * 1000)                      
+  send(me, Time.utc_now().second
+end
+
+Time.utc_now().second             #=> 47
+
+Parallel.map([1, 2, 3, 1], fun)   #=> [47, 48, 51, 47]
+
+Time.utc_now().second             #=> 51
 ```
 
 ???
@@ -140,27 +174,10 @@ second message is received. It'll be in the mailbox for sure, but it won't be
 received by the process because we're receiving things in specific order there.
 
 ---
-class: middle
 
-```elixir
-def async(func, node \\ Node.self()) do
-  ref = make_ref()
-  me = self()
-  Node.spawn(node, fn -> send(me, {ref, func()}) end)
-  ref
-end
-
-def await(ref, timeout) do
-  receive do
-    {^ref, value} -> value
-
-  after timeout
-    raise TimeoutError
-  end
-end
-
+```
 def map(collection, func) do
-  node_stream = Stream.cycle(Node.list())
+  node_stream = `Stream.cycle(Node.list())`
 
   collection
   |> Stream.zip(node_stream)
@@ -168,6 +185,20 @@ def map(collection, func) do
        async(fn -> func.(elem) end, node)
      end)
   |> Enum.map(&await(&1, :infinity))
+end
+
+def async(func`, node \\ Node.self()`) do
+  ref = make_ref()
+  me = self()
+  `Node.spawn(node, fn -> send(me, {ref, func()}) end)`
+  ref
+end
+
+def await(ref, timeout) do
+  receive do
+    {^ref, value} -> value
+    after timeout -> {:error, :timeout}
+  end
 end
 ```
 

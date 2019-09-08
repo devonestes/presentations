@@ -2,12 +2,23 @@
 @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
 @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
 
-body { font-family: 'Droid Serif'; }
+body {
+  font-family: 'Droid Serif';
+}
+
 h1, h2, h3 {
   font-family: 'Yanone Kaffeesatz';
   font-weight: normal;
 }
-.remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+
+.remark-code, .remark-inline-code {
+  font-family: 'Ubuntu Mono';
+  background-color: #F0F0F0 !important;
+}
+
+.remark-slide-content {
+  background-color: #F0F0F0;
+}
 
 img {
   max-height: 600px;
@@ -28,7 +39,6 @@ img {
 
 .elixir {
   width: fit-content;
-  padding: 20px !important;
   margin: 0 auto;
   font-size: 20px;
 }
