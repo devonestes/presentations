@@ -13,7 +13,7 @@ h1, h2, h3 {
 
 .remark-code, .remark-inline-code {
   font-family: 'Ubuntu Mono';
-  background-color: #F0F0F0 !important;
+  background-color: rgb(250, 250, 250) !important;
 }
 
 .remark-code {
@@ -22,7 +22,7 @@ h1, h2, h3 {
 }
 
 .remark-slide-content {
-  background-color: #F0F0F0;
+  background-color: rgb(250, 250, 250) !important;
 }
 
 img {

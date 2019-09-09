@@ -171,7 +171,7 @@ class: padding
 me = self()
 
 fun = fn seconds ->
-  Process.sleep(seconds * 1000) # Simulate some expensive work
+  Process.sleep(seconds * 1000)    # Simulate some expensive work
   send(me, Time.utc_now().second)
 end
 ```
@@ -179,19 +179,19 @@ end
 --
 
 ```
-Time.utc_now().second             #=> 48
+Time.utc_now().second              #=> 48
 ```
 
 --
 
 ```
-Parallel.map([1, 2, 3, 1], fun)   #=> [48, 49, 50, 48]
+Parallel.map([1, 2, 3, 1], fun)    #=> [49, 50, 51, 49]
 ```
 
 --
 
 ```
-Time.utc_now().second             #=> 50
+Time.utc_now().second              #=> 51
 ```
 
 ???
