@@ -28,6 +28,11 @@ open source examples of some concurrent computation.
 ---
 class: center, middle
 
+# Embarrassingly Parallel
+
+---
+class: center, middle
+
 ![Recursion](/assets/images/recursion.gif)
 
 ???
@@ -386,14 +391,14 @@ class: padding
 ]
 
 ```
-def run_module(module) do
-  EventManager.module_started(module)
+def run_module(mod) do
+  EventManager.module_started(mod)
 
-  module
+  mod
   |> get_tests()
   |> Enum.map(&run_test/1)
 
-  EventManager.module_finished(module)
+  EventManager.module_finished(mod)
 end
 ```
 --
@@ -427,8 +432,8 @@ def run() do
   |> format_results()
 end
 
-def run_module(module) do
-  module
+def run_module(mod) do
+  mod
   |> get_tests()
   |> Enum.map(&run_test/1)
 end
@@ -481,9 +486,9 @@ class: middle, center
 # Parallel Map
 ]
 
-- a
-- b
-- c
+- Simple!
+- Rigid
+- No coordination between units
 ]
 
 .fifty[
@@ -491,9 +496,9 @@ class: middle, center
 # Event Manager
 ]
 
-- a
-- b
-- c
+- Complex (but still not so bad)
+- Totally flexible
+- Single point of coordination between units (great for side effects)
 ]
 ]
 
