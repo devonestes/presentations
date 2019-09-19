@@ -2,10 +2,26 @@
 layout: presentation
 title: Embedded Application Development (for Web Developers)
 permalink: /embedded_development/
----
 
-# Embedded Application Development
-#### (for Web Developers)
+---
+layout: true
+.watermark-left[@devoncestes]
+.watermark-middle[GOTO Berlin 2019]
+
+---
+class: center, middle, gotober-intro
+
+---
+class: center, middle, headline
+
+## Embedded Application Development
+### &nbsp;
+
+---
+class: center, middle, headline
+
+## Embedded Application Development
+### *for Web Developers
 
 ???
 My name is Devon...
@@ -40,43 +56,9 @@ for dozens of them - not to mention drivers for dozens of possible peripherals
 - is really quite hard!
 
 ---
+class: center, middle
 
-# What are embedded applications?
-
-???
-Nowadays, just about everything we have has some sort of software in it. It can
-be really tiny software that doesn't run on any sort of OS, or it can be massive
-applications that run on some form of OS (often a version of Linux for these
-huge embedded systems). But my definition of embedded software is some sort of
-application that is deeply, deeply tied to some sort of hardware.
-
-Just because some piece of software doesn't run on the web doesn't mean it's
-embedded software. Mobile and desktop applications certainly aren't embedded
-applications, but you could argue that the operating systems that these
-applications run on _are_ examples of embedded software.
-
----
-
-# Picture of the boys' clock
-
-???
-This is software!
-
-This is the clock that wakes my kids up in the morning. It's cute, and it lights
-up green when it's time for them to come out of their room.
-
-I know that it has software in it because sometimes, when my kids wake up early
-and don't want to wait for the light to turn green, they'll open up the back
-and start smashing all the buttons to try and make it turn green earlier.
-
-Unfortunatley for them, all this does is make the thing freeze up and I need to
-turn it off and back on again to make it work again.
-
-So, yeah, that's software for you!
-
----
-
-# Picture of a Tesla
+![Tesla](/assets/images/tesla.jpg)
 
 ???
 This is also now software!
@@ -85,91 +67,109 @@ Tesla famously runs millions of lines of code through their cars, and that
 software is _critical_ to the operation of their cars.
 
 ---
+class: center, middle
 
-# The two types of embedded software
-
-???
-At the very highest level, embedded software can be divided up into two broad
-categories.
-
---
-
-* Software that gets updated
-
---
-
-* Software that doesn't get updated
+![Tesla](/assets/images/tesla-ota-update.png)
 
 ???
-When you think about it, this distintion is _huge_, and for many reasons.
-
-If you're shipping software today, can you even imagine what it would be like if
-you were only able to ship once? So, every bug that you ship never gets fixed?
-No new features are added after you ship? It sure raises the stakes when it
-comes to getting things right.
-
-The two examples I just gave illustrate the differences between these two types
-of embedded devices. That clock doesn't get any updates. That bug that they
-shipped where pushing a certain combination of buttons in a certain amount of
-time makes the thing freeze will never get fixed. That's just how that thing
-works at this point.
-
-Tesla, however, can change the code in their cars with the push of a button, as
-they do occasionally before natural disasters in the US so they can give folks
-extra range and get out of harm's way.
-
-But this ability to connect remotely to these embedded applications raises other
-concerns, especially around security and privacy.
+We know that this software is critical because it controls things like how long
+your battery lasts in your car.
 
 ---
+class: center, middle
 
-# IoT is here to stay
+![Tesla](/assets/images/fridge-open-source-1.png)
 
 ???
-What's for sure, though, is that right now a great number of our posessions have
-software in them, and over time more and more of them will also have software in
-them, and that over time this software will get more complicated. There's no
-putting that genie back in the bottle.
+
+There is software just about everywhere these days. In fact, this a page from
+the manual for a Samsung refrigerator.
 
 ---
+class: center, middle
 
-# Picture of StarCraft box
+![Tesla](/assets/images/fridge-open-source-2.png)
 
-Now, the web is surely here to stay as well. But, I'm old enough to remember a
-time when I was realy excited to go down to Staples and pick up the newest cool
-video game, which came in a physical box, with a physical CD that I would put in
-my computer and then spend 10 minutes waiting for it to install before I could
-play it.
+???
 
-Basically, what I'm trying to say is - things change, and what do I really know
-about what the future holds?
-
-And so, what I'm going to go over today is how I - as someone who spent his
-entire career essentially putting spreadsheets on the internet in the form of
-web applications - went through the process of learning about developing
-embedded systems and how that changed my development style both for embedded
-_and_ web applications!
+When you go to the link they mention, you see something like this, because these
+companies need to comply with the licenses of the open source software they use
+somehow!
 
 ---
+class: center, middle, headline
 
-# Picture of Mary Poppins "Let's start at the very beginning"
+## Internet of Things
 
----
-
-# Picture of Mary Poppins "A very good place to start"
-
----
-
-# Picture of Mary Poppins "When you read, you begin with A,B,C"
-
----
-
-# Picture of Mary Poppins "When you write embedded software you begin with
-product design"
+???
+It's here, but it's different. The thing that I learned really quickly on this
+project was that while the code might be the same, there are some restrictions
+that change a lot of things. Most importantly, on many of these devices, you
+can't just push an update whenever you want. And when you can't push updates
+whenever you want, a whole lot of stuff falls down in the way software is
+developed today.
 
 ---
+class: center, middle, max-img-width-940
 
-# Design
+# Project success
+
+![Linear growth](/assets/images/linear-growth.png)
+
+???
+
+The thing with agile software development is that project success is correlated
+to a team's ability to gather feedback about their software and then iterate
+based on that feedback. This feedback takes a lot of forms, but that's the
+theory behind agile.
+
+With embedded software, both the ability to gather feedback and the ability to
+iterated based on that feedback is severely, severely limited. It depends of
+course on the specific project, but this was very much the case for the project
+I was working on, and is also the case for a great deal of embedded projects.
+
+This means that you need to fall back to essentially a version of waterfall, and
+in wat
+
+---
+class: center, middle, max-img-width-940
+
+# Predicting the future!
+
+![Crystal Ball](/assets/images/crystal-ball.jpg)
+
+???
+
+I'm not talking about knowing who is going to win the Super Bowl this year.
+
+This is about predicting how your software is going to need to change after you
+deploy it.
+
+---
+class: center, middle, headline
+
+## Built the wrong thing
+## &nbsp;
+## &nbsp;
+
+---
+class: center, middle, headline
+
+## Built the wrong thing
+## Bugs
+## &nbsp;
+
+---
+class: center, middle, headline
+
+## Built the wrong thing
+## Bugs
+## Security vulnerabilities
+
+---
+class: center, middle, headline
+
+# Product Design
 
 ???
 Before the product is even built, how do you design it? You can't rapidly
@@ -187,37 +187,12 @@ more resources).
 =======================================================================
 
 ---
+class: center, middle
 
-# Development
-
-???
-Ok, so we have some idea of what we want, but now we need to build it. What do
-we need to focus on?
-
-Robustness, fault tolerence are extremely important. Turn it off and on again is
-a terrible solution!
-
-You're almost certainly going to have persistant local state in these
-applications, so getting that right is really important. This makes shared
-mutable state generally a bad idea.
-
-You're likely going to be running on very small hardware with limited resources.
-Performance might be something you care about, but you definitely can't run out
-of memory - this rules out Ruby.
-
-=======================================================================
-Make the pitch that Erlang/Elixir is a great choice for embedded development
-because of this (main section - 5 minutes).
-
-Turns out that a language that was designed exclusively for fault-tolerent
-embedded software is really good for writing fault-tolerent embedded software!
-
-It's also good for lots of other things, but this is one of the rare use cases
-where I'd say that some of the other languages in its class are left totally in
-the dust in terms of features.
-=======================================================================
+![Design sprint](/assets/images/design-sprint.png)
 
 ---
+class: center, middle, headline
 
 # Testing
 
@@ -251,6 +226,12 @@ Property testing is extremely helpful (main section - 5 minutes)
 =====================================
 
 ---
+class: center, middle
+
+![](/assets/images/property-testing.jpg)
+
+---
+class: center, middle, headline
 
 # Debugging
 
@@ -269,6 +250,7 @@ Show a little bit of the power of the observer (main section - 5 minutes)
 =================================================
 
 ---
+class: center, middle, headline
 
 # Security
 
@@ -296,3 +278,12 @@ combinatorial explosion of possible attack targets makes using dependencies a
 risky business.
 
 Limit your use of dependencies - this basically rules out JavaScript.
+
+---
+class: center, middle, headline
+
+# The web?
+
+---
+
+class: center, middle, gotober-outro
