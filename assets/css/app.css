@@ -65,6 +65,11 @@ img {
   max-width: 1050px;
 }
 
+.fullscreen-image img {
+  height: 600px;
+  max-width: 1050px;
+}
+
 .watermark-left {
     position: absolute;
     bottom: 0px;
