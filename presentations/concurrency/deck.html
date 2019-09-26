@@ -9,10 +9,10 @@ layout: true
 
 ---
 
-class: center, middle
+class: center, middle, headline
 
-# Comparing Common Concurrency Patterns
-## in Elixir and Erlang
+## Comparing Common Concurrency Patterns
+### in Elixir and Erlang
 
 ???
 My name is Devon...
@@ -26,9 +26,9 @@ going to be talking about today. Specifically, we're going to be looking at two
 open source examples of some concurrent computation.
 
 ---
-class: center, middle
+class: center, middle, headline
 
-# Embarrassingly Parallel
+## Embarrassingly Parallel
 
 ---
 class: center, middle
@@ -127,7 +127,90 @@ waiting for all of them to finish.
 But I want to go one level deeper here, because I think it's kind of important
 to know what's actually going on in those Task functions.
 
+---
 
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = `make_ref()`
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  `me` = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  `spawn(fn -> send(me, {ref, func()}) end)`
+  ref
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  `ref`
+end
+```
 
 ---
 
@@ -146,13 +229,115 @@ def async(func) do
 end
 ```
 
---
-
 ```
 def await(ref, timeout \\ :infinity) do
   receive do
     {^ref, value} -> value
     after timeout -> {:error, :timeout}
+  end
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+```
+def await(ref, timeout \\ :infinity) do
+  `receive` do
+    {^ref, value} -> value
+    after timeout -> {:error, :timeout}
+  end
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+```
+def await(ref, timeout \\ :infinity) do
+  receive do
+    {`^ref`, value} -> value
+    after timeout -> {:error, :timeout}
+  end
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+```
+def await(ref, timeout \\ :infinity) do
+  receive do
+    {^ref, value} -> `value`
+    after timeout -> {:error, :timeout}
+  end
+end
+```
+
+---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+```
+def await(ref, timeout \\ :infinity) do
+  receive do
+    {^ref, value} -> value
+    `after timeout` -> {:error, :timeout}
   end
 end
 ```
@@ -205,39 +390,6 @@ So, if we do something like this, we will get one message in one second, and
 then our process won't receive the third and fourth messages until after that
 second message is received. It'll be in the mailbox for sure, but it won't be
 received by the process because we're receiving things in specific order there.
-
----
-class: padding
-
-.center[
-# Distributed Parallel Map
-]
-
-```
-def map(collection, func) do
-  node_stream = `Stream.cycle(Node.list())`
-
-  collection
-  |> Stream.zip(node_stream)
-  |> Stream.map(fn {elem, node} ->
-       async(fn -> func.(elem) end, node)
-     end)
-  |> Enum.map(&await(&1, :infinity))
-end
-```
-
-???
-
-And this is only tangentially related, but I always like showing it because it's
-just so damn cool. Before what we had was an implementation that was using 100%
-of the CPU cycles on our node. But now, what we have here with literally one
-line changed, and only barely so, is a distributed implementation that will use
-100% of the CPU cycles on every node in our cluster. Going from a single machine
-to a distributed map-reduce is just that easy!
-
-This is also where I have to put the disclaimer that handling all the myriad
-failure possiblities with distributed systems is extremely complicated, and that
-this won't reliably work in production. But still, it's cool, right?!
 
 ---
 class: padding
@@ -363,6 +515,145 @@ class: padding
 def loop(:async) do
   case wait_for_module(:async) do
     {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case `wait_for_module(:async)` do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    `{:ok, mod}` ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      `spawn(fn -> run_module(mod) end)`   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      `loop(:async)`
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    `{:error, :no_more_async_modules}` ->
+      loop(:sync)
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      `loop(:sync)`
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
       spawn(fn -> run_module(mod) end)   # non-blocking
       loop(:async)
 
@@ -374,11 +665,197 @@ end
 def loop(:sync) do
   case wait_for_module(:sync) do
     {:ok, mod} ->
-      run_module(mod)                    # blocking
+      run_module(mod)
       loop(:sync)
 
     {:error, :no_more_modules} ->
       :ok
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+
+def loop(:sync) do
+  case `wait_for_module(:sync)` do
+    {:ok, mod} ->
+      run_module(mod)
+      loop(:sync)
+
+    {:error, :no_more_modules} ->
+      :ok
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+
+def loop(:sync) do
+  case wait_for_module(:sync) do
+    `{:ok, mod}` ->
+      run_module(mod)
+      loop(:sync)
+
+    {:error, :no_more_modules} ->
+      :ok
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+
+def loop(:sync) do
+  case wait_for_module(:sync) do
+    {:ok, mod} ->
+      `run_module(mod)`                   # blocking
+      loop(:sync)
+
+    {:error, :no_more_modules} ->
+      :ok
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+
+def loop(:sync) do
+  case wait_for_module(:sync) do
+    {:ok, mod} ->
+      run_module(mod)                   # blocking
+      `loop(:sync)`
+
+    {:error, :no_more_modules} ->
+      :ok
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+
+def loop(:sync) do
+  case wait_for_module(:sync) do
+    {:ok, mod} ->
+      run_module(mod)                   # blocking
+      loop(:sync)
+
+    `{:error, :no_more_modules}` ->
+      :ok
+  end
+end
+```
+
+---
+class: padding
+
+.hidden[
+# _
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)   # non-blocking
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+
+def loop(:sync) do
+  case wait_for_module(:sync) do
+    {:ok, mod} ->
+      run_module(mod)                   # blocking
+      loop(:sync)
+
+    {:error, :no_more_modules} ->
+      `:ok`
   end
 end
 ```
@@ -421,8 +898,8 @@ complicated than what we had before. Could we simplify this?
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# ExUnit As Parallel Map
 ]
 
 ```
@@ -430,12 +907,6 @@ def run() do
   load_modules()
   |> Parallel.map(&run_module/1)
   |> format_results()
-end
-
-def run_module(mod) do
-  mod
-  |> get_tests()
-  |> Enum.map(&run_test/1)
 end
 ```
 
@@ -467,9 +938,16 @@ for me to dive in and make those changes, so kudos to the folks that designed
 that originally and expanded on it over the years.
 
 ---
-class: middle, center
+class: padding, center, headline, middle
 
-# State Machines are great!
+## EventManager
+### as (kind of) a
+## State Machine
+
+---
+class: middle, center, headline
+
+## State Machines are great!
 
 ### `:gen_statem`
 ### `:gen_event`
@@ -477,13 +955,106 @@ class: middle, center
 ---
 
 .center[
-# The tradeoffs
+.headline[
+## The tradeoffs
+]
 ]
 
 .cols[
 .fifty[
 .center[
-# Parallel Map
+.headline[
+### Parallel Map
+]
+]
+]
+
+.fifty[
+.center[
+.headline[
+### Event Manager
+]
+]
+]
+]
+
+---
+
+.center[
+.headline[
+## The tradeoffs
+]
+]
+
+.cols[
+.fifty[
+.center[
+.headline[
+### Parallel Map
+]
+]
+
+- Simple!
+]
+
+.fifty[
+.center[
+.headline[
+### Event Manager
+]
+]
+
+- Complex (but still not so bad)
+]
+]
+
+---
+
+.center[
+.headline[
+## The tradeoffs
+]
+]
+
+.cols[
+.fifty[
+.center[
+.headline[
+### Parallel Map
+]
+]
+
+- Simple!
+- Rigid
+]
+
+.fifty[
+.center[
+.headline[
+### Event Manager
+]
+]
+
+- Complex (but still not so bad)
+- Totally flexible
+]
+]
+
+
+---
+
+.center[
+.headline[
+## The tradeoffs
+]
+]
+
+.cols[
+.fifty[
+.center[
+.headline[
+### Parallel Map
+]
 ]
 
 - Simple!
@@ -493,7 +1064,9 @@ class: middle, center
 
 .fifty[
 .center[
-# Event Manager
+.headline[
+### Event Manager
+]
 ]
 
 - Complex (but still not so bad)
