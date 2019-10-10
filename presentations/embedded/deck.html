@@ -258,6 +258,25 @@ class: center, middle
 ![](/assets/images/property-testing.jpg)
 
 ---
+class: padding, middle
+
+```elixir
+property "sum of two positive integers is greater than both integers" do
+  check all int1 <- pos_integer(),
+            int2 <- pos_integer() do
+    sum = int1 + int2
+    assert sum > int1
+    assert sum > int2
+  end
+end
+```
+
+---
+class: center, middle, fullscreen-image
+
+![](/assets/images/quickcheck.png)
+
+---
 class: center, middle, fullscreen-image
 
 ![](/assets/images/phone_testing.jpg)
