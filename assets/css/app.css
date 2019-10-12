@@ -112,6 +112,13 @@
   format("opentype");
 }
 
+html.remark-container body.remark-container.remark-presenter-mode div.remark-notes-area div.remark-bottom-area div.remark-notes-current-area {
+  font-size: 25px;
+}
+html.remark-container body.remark-container.remark-presenter-mode div.remark-notes-area div.remark-bottom-area div.remark-notes-preview-area {
+  font-size: 25px;
+}
+
 .emoji {
   font-family: 'emoji';
 }

@@ -16,6 +16,10 @@ class: center, middle, headline
 ## Embedded Application Development
 ### &nbsp;
 
+???
+# Intro
+# Orchard story
+
 ---
 class: center, middle, headline
 
@@ -23,54 +27,24 @@ class: center, middle, headline
 ### *for Web Developers
 
 ???
-My name is Devon...
-
-For pretty much all of my career I've been a web developer...
-
-For the last 4 years I've been doing Elixir/Erlang...
-
-Last year, I was contacted by a company who wanted to hire me to work on their
-applications. One was something I had seen several times before - a
-high-throughput GraphQL API.
-
-But the second was something new to me - an embedded application.
-
-This company was building Point of Sale systems for restaurants and retail
-chains in the US, and those POS systems communicated back to that central API
-for all kinds of helpful things for owners and operators of these retail
-locations.
-
-And powering these POS systems was embedded software, running on dozens of
-different kinds of hardware in hundreds of locations across a _very_ large
-country. A huge selling point for this company is that their software would be
-able to run on your existing POS hardware, and that was a huge challenge.
-
-To put this challenge into web development terms, imagine you're building a web
-app that needs to run _perfectly_ in every web browser that's been used over
-the last 20 years - and yes, I mean everything from Internet Explorer 5 to
-today!
-
-Writing software for one hardware platform isn't so bad, but writing software
-for dozens of them - not to mention drivers for dozens of possible peripherals
-- is really quite hard!
+# Different -> Lots to learn
+# What is embedded software?
 
 ---
 background-image: url(/assets/images/tesla.jpg)
 
 ???
-This is also now software!
-
-Tesla famously runs millions of lines of code through their cars, and that
-software is _critical_ to the operation of their cars.
+# Famous example
+# How do we know?
 
 ---
 class: center, middle
 
-![Tesla](/assets/images/tesla-ota-update.png)
+![](/assets/images/tesla-ota-update.png)
 
 ???
-We know that this software is critical because it controls things like how long
-your battery lasts in your car.
+# OTA updates
+# Other ways to tell
 
 ---
 class: center, middle
@@ -78,9 +52,7 @@ class: center, middle
 ![](/assets/images/fridge-open-source-1.png)
 
 ???
-
-There is software just about everywhere these days. In fact, this a page from
-the manual for a Samsung refrigerator.
+# Samsung fridge
 
 ---
 class: center, middle
@@ -88,38 +60,42 @@ class: center, middle
 ![](/assets/images/fridge-open-source-2.png)
 
 ???
-
-When you go to the link they mention, you see something like this, because these
-companies need to comply with the licenses of the open source software they use
-somehow!
+# 2019 - year of Linux on the refrigerator
 
 ---
 class: center, middle, headline
 
-## Internet of Things
+## 🤖 Internet of Things 🤖
 
 ???
-It's here, but it's different. The thing that I learned really quickly on this
-project was that while the code might be the same, there are some restrictions
-that change a lot of things. Most importantly, on many of these devices, you
-can't just push an update whenever you want. And when you can't push updates
-whenever you want, a whole lot of stuff falls down in the way software is
-developed today.
+# Web drove last 20 years
+# 1 biggest difference
 
 ---
 class: center, middle, headline
 
 # 📦 Shipping 📦
 
+???
+# Maybe device not connected to internet
+# If it is, user often needs to accept update
+
 ---
 class: center, middle, headline
 
 # 🎉 Success 🎉
 
+???
+# Agile tells us shipping is key to success
+# Waterfall tells us planning is key to success
+
 ---
 class: center, middle
 
 ![Linear growth](/assets/images/IMG-0237.png)
+
+???
+# No scale on axes
 
 ---
 class: center, middle
@@ -127,29 +103,14 @@ class: center, middle
 ![Linear growth](/assets/images/IMG-0236.png)
 
 ???
-
-The thing with agile software development is that project success is correlated
-to a team's ability to gather feedback about their software and then iterate
-based on that feedback. This feedback takes a lot of forms, but that's the
-theory behind agile.
-
-With embedded software, both the ability to gather feedback and the ability to
-iterated based on that feedback is severely, severely limited. It depends of
-course on the specific project, but this was very much the case for the project
-I was working on, and is also the case for a great deal of embedded projects.
-
-This means that you need to fall back to essentially a version of waterfall, and
-in wat
+# Waterfall only gives us this
 
 ---
 background-image: url(/assets/images/crystal-ball.jpg)
 
 ???
-
-I'm not talking about knowing who is going to win the Super Bowl this year.
-
-This is about predicting how your software is going to need to change after you
-deploy it.
+# Not winner of Superbowl
+# How will this need to change
 
 ---
 class: center, middle, headline
@@ -157,6 +118,10 @@ class: center, middle, headline
 ## Built the wrong thing
 ## &nbsp;
 ## &nbsp;
+
+???
+# Truly common
+# Pivoting is expensive with hardware!
 
 ---
 class: center, middle, headline
@@ -164,6 +129,10 @@ class: center, middle, headline
 ## Built the wrong thing
 ## Bugs
 ## &nbsp;
+
+???
+# Can't avoid them all
+# Can also be really expensive
 
 ---
 class: center, middle, headline
@@ -172,25 +141,25 @@ class: center, middle, headline
 ## Bugs
 ## Security vulnerabilities
 
+???
+# Can be thought of as a bug
+# Different because stakes are higher
+
 ---
 class: center, middle, headline
 
 # Product Design
 
 ???
-Before the product is even built, how do you design it? You can't rapidly
-iterate on designs because you can't control if users actually update or not.
+# All starts here
+# Maybe most expensive mistake possible
 
-Getting your product right to meet your users' needs is a really tricky process,
-and not being able to rapidly iterate makes it even more difficult!
+---
+background-image: url(/assets/images/juicero.jpg)
 
-You build and test mockups and do lots of user testing. Alpha and Beta users are
-crucial.
-
-=======================================================================
-Design sprints are really helpful here (5 minutes on design sprints, links to
-more resources).
-=======================================================================
+???
+# Made a phone for people who don't like phones
+# To avoid this, you have two choices
 
 ---
 class: center, middle, headline
@@ -202,26 +171,76 @@ class: center, middle, headline
 class: center, middle, headline
 
 ## KISS
-## Design Sprints
-
----
-class: center, middle, headline
-
-## KISS
 ## Keep It Simple, Stupid
+
+???
+# Old saying/rule, but applies to IOT well
+# Aligned with the UNIX philosophy
 
 ---
 background-image: url(/assets/images/warehouse.gif)
+
+???
+# Factories have 1000s of these
+# When was the last time they updated `ls`?
 
 ---
 class: center, middle, headline
 
 # Design Sprints
 
+???
+# Came out of Google Ventures
+# Reduce risk by breadth-first search of problem space
+
 ---
 class: center, middle, headline
 
 ![Design sprint](/assets/images/design-sprint.png)
+
+???
+# 5 phases, each over one day
+# You need a good facilitator who knows what they're doing
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step1.png)
+
+???
+# Get information from experts and research
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step2.png)
+
+???
+# Get as many options as possible
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step3.png)
+
+???
+# Narrow options down to one path forward
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step4.png)
+
+???
+# Build as much of a prototype as possible in a day
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step5.png)
+
+???
+# Get actual users to try your prototype and get feedback
 
 ---
 class: center, middle, headline
@@ -229,37 +248,22 @@ class: center, middle, headline
 # Testing
 
 ???
-How many of you have some sort of monitoring/observability platform that allows
-you to monitor production systems?
-
-How many of you test in production?
-
-I have some bad news for you if you put your hand down after the first question
-- you're testing in production! If you had total confidence that your
-application was working 100% correctly in all situations, then
-monitoring/observability is unneeded.
-
-You can't test in production when you don't have access to production devices.
-This makes replicating production-like usage of your application extremely
-important.
-
-Show picture of Facebook mobile testing:
-
-"In each rack, above the tangle of cables and phones, sits a camera, recording
-every onscreen movement in case a developer needs to review a specific hiccup."
-
-A strong type system is really helpful. This gives us a baseline of confidence
-in the "correctness" of your program. Again, if deploying is difficult - or
-impossible - then you really want to find bugs before your users do.
-
-=====================================
-Property testing is extremely helpful (main section - 5 minutes)
-=====================================
+# Move fast & break things - no!
+# Bad user experiences can kill a product
 
 ---
-class: center, middle
+class: center, middle, headline
 
-![](/assets/images/property-testing.jpg)
+![](/assets/images/smart-summon.png)
+
+???
+# And it might not just kill a product, but people!
+
+---
+class: center, middle, fullscreen-image
+
+![](/assets/images/quickcheck.png)
+
 
 ---
 class: padding, middle
@@ -276,12 +280,16 @@ end
 ```
 
 ---
-class: center, middle, fullscreen-image
+class: center, middle
 
-![](/assets/images/quickcheck.png)
+![](/assets/images/property-testing.jpg)
 
 ---
 background-image: url(/assets/images/phone_testing.jpg)
+
+???
+# Observability is testing in production
+# Test in production, but in house! Do real QA, and take videos!
 
 ---
 class: center, middle, headline
@@ -289,18 +297,25 @@ class: center, middle, headline
 # Debugging
 
 ???
-Running an application on dozens of different hardware platforms is really
-tricky to get right! How do you debug when things go wrong?
+# Help - it's not working!
+# Normally, we look at logs. If we need more, we need to ship...
 
-When it comes to debugging, nothing comes close to the helpfulness of connecting
-to a running OTP application.
+---
+class: center, middle, fullscreen-image
 
-Even finding out if you have bugs can be really tricky since you might need
-users to report them, and they often don't.
+![](/assets/images/observer.png)
 
-=================================================
-Show a little bit of the power of the observer (main section - 5 minutes)
-=================================================
+???
+# Connect to the running node without interruption, add logging, get data, etc.
+# This is an absolute SUPERPOWER for debugging. Nothing like it.
+
+---
+class: center, middle, headline
+
+# Debug Mode
+
+???
+# Super common in IOT, not in web. Don't forget to add!
 
 ---
 class: center, middle, headline
@@ -308,34 +323,50 @@ class: center, middle, headline
 # Security
 
 ???
-The "S" in IoT stands for security.
+# The "S" in IoT stands for security.
+# This is so, so important.
 
-I know what many of you might have been thinking a bit. "Why isn't he mentioning
-C or C++ in a talk on embedded software?"
+---
+class: center, middle, headline
+background-image: url(/assets/images/wannacry.png)
 
-https://www.coreinfrastructure.org/programs/census-project/
-Main Language: If the project’s main language is C or C++, add 2 points.
+???
+# I really hope you've never seen this before.
+# Vulnerability patched 14 March, 2017. Millions still vulnerable today!
+# Months after the patches, Ukraine severely attacked, hundreds of millions in
+damage.
 
-With great power comes great buffer overflow bugs - Spiderman meme.
+---
+class: center, middle
 
-You need to be able to do this without opening up your users to huge security
-issues. Especially in my case, where money and financial information is
-involved and it's connected to the internet, we needed to be rock solid.
+![](/assets/images/cii-parameters.png)
 
-Do you really want to run code written by strangers on the internet on your
-users' devices?
+???
 
-I love that we trust the OSS community as much as we do, but this is potentially
-dangerous. There are a whole host of possible attack vectors, and the
-combinatorial explosion of possible attack targets makes using dependencies a
-risky business.
+# Not a whole lot we can easily control - language choice is one.
+# Choosing to use OSS dependencies is another. Strangers on the internet!
 
-Limit your use of dependencies - this basically rules out JavaScript.
+---
+class: center, middle, fullscreen-image
+
+![](/assets/images/hacker-shiba.jpg)
+
+???
+
+# Get experts! They're expensive, but worth it.
+# Pay now or later - your choice.
 
 ---
 class: center, middle, headline
 
-# The Web
+# 🌐 The Web 🌐
+
+???
+
+# Design sprints are great - try them!
+# Property testing is awesome!
+# Elixir is awesome!
+# Please care about security!
 
 ---
 layout: false
