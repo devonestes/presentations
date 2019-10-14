@@ -2,6 +2,8 @@
 layout: presentation
 title: Embedded Application Development (for Web Developers)
 permalink: /embedded_development/
+---
+background-image: url(/assets/images/intro_Ber.png)
 
 ---
 layout: true
@@ -9,13 +11,14 @@ layout: true
 .watermark-middle[GOTO Berlin 2019]
 
 ---
-class: center, middle, gotober-intro
-
----
 class: center, middle, headline
 
 ## Embedded Application Development
 ### &nbsp;
+
+???
+# Intro
+# Orchard story
 
 ---
 class: center, middle, headline
@@ -24,126 +27,90 @@ class: center, middle, headline
 ### *for Web Developers
 
 ???
-My name is Devon...
+# Different -> Lots to learn
+# What is embedded software?
 
-For pretty much all of my career I've been a web developer...
+---
+background-image: url(/assets/images/tesla.jpg)
 
-For the last 4 years I've been doing Elixir/Erlang...
-
-Last year, I was contacted by a company who wanted to hire me to work on their
-applications. One was something I had seen several times before - a
-high-throughput GraphQL API.
-
-But the second was something new to me - an embedded application.
-
-This company was building Point of Sale systems for restaurants and retail
-chains in the US, and those POS systems communicated back to that central API
-for all kinds of helpful things for owners and operators of these retail
-locations.
-
-And powering these POS systems was embedded software, running on dozens of
-different kinds of hardware in hundreds of locations across a _very_ large
-country. A huge selling point for this company is that their software would be
-able to run on your existing POS hardware, and that was a huge challenge.
-
-To put this challenge into web development terms, imagine you're building a web
-app that needs to run _perfectly_ in every web browser that's been used over
-the last 20 years - and yes, I mean everything from Internet Explorer 5 to
-today!
-
-Writing software for one hardware platform isn't so bad, but writing software
-for dozens of them - not to mention drivers for dozens of possible peripherals
-- is really quite hard!
+???
+# Famous example
+# How do we know?
 
 ---
 class: center, middle
 
-![Tesla](/assets/images/tesla.jpg)
+![](/assets/images/tesla-ota-update.png)
 
 ???
-This is also now software!
-
-Tesla famously runs millions of lines of code through their cars, and that
-software is _critical_ to the operation of their cars.
+# OTA updates
+# Other ways to tell
 
 ---
 class: center, middle
 
-![Tesla](/assets/images/tesla-ota-update.png)
+![](/assets/images/fridge-open-source-1.png)
 
 ???
-We know that this software is critical because it controls things like how long
-your battery lasts in your car.
+# Samsung fridge
 
 ---
 class: center, middle
 
-![Tesla](/assets/images/fridge-open-source-1.png)
+![](/assets/images/fridge-open-source-2.png)
 
 ???
-
-There is software just about everywhere these days. In fact, this a page from
-the manual for a Samsung refrigerator.
-
----
-class: center, middle
-
-![Tesla](/assets/images/fridge-open-source-2.png)
-
-???
-
-When you go to the link they mention, you see something like this, because these
-companies need to comply with the licenses of the open source software they use
-somehow!
+# 2019 - year of Linux on the refrigerator
 
 ---
 class: center, middle, headline
 
-## Internet of Things
+## 🤖 Internet of Things 🤖
 
 ???
-It's here, but it's different. The thing that I learned really quickly on this
-project was that while the code might be the same, there are some restrictions
-that change a lot of things. Most importantly, on many of these devices, you
-can't just push an update whenever you want. And when you can't push updates
-whenever you want, a whole lot of stuff falls down in the way software is
-developed today.
+# Web drove last 20 years
+# 1 biggest difference
 
 ---
-class: center, middle, max-img-width-940
+class: center, middle, headline
 
-# Project success
-
-![Linear growth](/assets/images/linear-growth.png)
+# 📦 Shipping 📦
 
 ???
-
-The thing with agile software development is that project success is correlated
-to a team's ability to gather feedback about their software and then iterate
-based on that feedback. This feedback takes a lot of forms, but that's the
-theory behind agile.
-
-With embedded software, both the ability to gather feedback and the ability to
-iterated based on that feedback is severely, severely limited. It depends of
-course on the specific project, but this was very much the case for the project
-I was working on, and is also the case for a great deal of embedded projects.
-
-This means that you need to fall back to essentially a version of waterfall, and
-in wat
+# Maybe device not connected to internet
+# If it is, user often needs to accept update
 
 ---
-class: center, middle, max-img-width-940
+class: center, middle, headline
 
-# Predicting the future!
-
-![Crystal Ball](/assets/images/crystal-ball.jpg)
+# 🎉 Success 🎉
 
 ???
+# Agile tells us shipping is key to success
+# Waterfall tells us planning is key to success
 
-I'm not talking about knowing who is going to win the Super Bowl this year.
+---
+class: center, middle
 
-This is about predicting how your software is going to need to change after you
-deploy it.
+![Linear growth](/assets/images/IMG-0237.png)
+
+???
+# No scale on axes
+
+---
+class: center, middle
+
+![Linear growth](/assets/images/IMG-0236.png)
+
+???
+# Waterfall only gives us this
+
+---
+background-image: url(/assets/images/crystal-ball.jpg)
+
+???
+# Not winner of Superbowl
+# How will this need to change
 
 ---
 class: center, middle, headline
@@ -151,6 +118,10 @@ class: center, middle, headline
 ## Built the wrong thing
 ## &nbsp;
 ## &nbsp;
+
+???
+# Truly common
+# Pivoting is expensive with hardware!
 
 ---
 class: center, middle, headline
@@ -158,6 +129,10 @@ class: center, middle, headline
 ## Built the wrong thing
 ## Bugs
 ## &nbsp;
+
+???
+# Can't avoid them all
+# Can also be really expensive
 
 ---
 class: center, middle, headline
@@ -166,25 +141,25 @@ class: center, middle, headline
 ## Bugs
 ## Security vulnerabilities
 
+???
+# Can be thought of as a bug
+# Different because stakes are higher
+
 ---
 class: center, middle, headline
 
 # Product Design
 
 ???
-Before the product is even built, how do you design it? You can't rapidly
-iterate on designs because you can't control if users actually update or not.
+# All starts here
+# Maybe most expensive mistake possible
 
-Getting your product right to meet your users' needs is a really tricky process,
-and not being able to rapidly iterate makes it even more difficult!
+---
+background-image: url(/assets/images/juicero.jpg)
 
-You build and test mockups and do lots of user testing. Alpha and Beta users are
-crucial.
-
-=======================================================================
-Design sprints are really helpful here (5 minutes on design sprints, links to
-more resources).
-=======================================================================
+???
+# Made a phone for people who don't like phones
+# To avoid this, you have two choices
 
 ---
 class: center, middle, headline
@@ -196,28 +171,57 @@ class: center, middle, headline
 class: center, middle, headline
 
 ## KISS
-## Design Sprints
-
----
-class: center, middle, fullscreen-image
-
-![Design sprint](/assets/images/warehouse.gif)
-
----
-class: center, middle, headline
-
-## KISS
 ## Keep It Simple, Stupid
+
+???
+# Old saying/rule, but applies to IOT well
+# Aligned with the UNIX philosophy
+
+---
+background-image: url(/assets/images/warehouse.gif)
+
+???
+# Factories have 1000s of these
+# When was the last time they updated `ls`?
 
 ---
 class: center, middle, headline
 
 # Design Sprints
 
+???
+# Came out of Google Ventures
+# Reduce risk by breadth-first search of problem space
+
 ---
 class: center, middle, headline
 
 ![Design sprint](/assets/images/design-sprint.png)
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step1.png)
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step2.png)
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step3.png)
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step4.png)
+
+---
+class: center, middle, headline
+
+![](/assets/images/sprint-step5.png)
 
 ---
 class: center, middle, headline
@@ -277,9 +281,11 @@ class: center, middle, fullscreen-image
 ![](/assets/images/quickcheck.png)
 
 ---
-class: center, middle, fullscreen-image
+background-image: url(/assets/images/phone_testing.jpg)
 
-![](/assets/images/phone_testing.jpg)
+???
+# Observability is testing in production
+# Test in production, but in house! QA is valuable!
 
 ---
 class: center, middle, headline
@@ -331,10 +337,20 @@ risky business.
 Limit your use of dependencies - this basically rules out JavaScript.
 
 ---
-class: center, middle, headline
+class: center, middle, fullscreen-image
 
-# The web?
+![](/assets/images/tangled-shiba.jpg)
 
 ---
+class: center, middle, fullscreen-image
 
-class: center, middle, gotober-outro
+![](/assets/images/hacker-shiba.jpg)
+
+---
+class: center, middle, headline
+
+# The Web
+
+---
+layout: false
+background-image: url(/assets/images/outro_Ber.png)
