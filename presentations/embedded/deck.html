@@ -14,7 +14,7 @@ layout: true
 class: center, middle, headline
 
 ## Embedded Application Development
-### &nbsp;
+#### &nbsp;
 
 ???
 # Intro
@@ -24,7 +24,7 @@ class: center, middle, headline
 class: center, middle, headline
 
 ## Embedded Application Development
-### *for Web Developers
+#### *for Web Developers
 
 ???
 # Different -> Lots to learn
@@ -113,33 +113,33 @@ background-image: url(/assets/images/crystal-ball.jpg)
 # How will this need to change
 
 ---
-class: center, middle, headline
+class: center, headline
 
-## Built the wrong thing
-## &nbsp;
-## &nbsp;
+### 🚫 Built the wrong thing 🚫
+### &nbsp;
+### &nbsp;
 
 ???
 # Truly common
 # Pivoting is expensive with hardware!
 
 ---
-class: center, middle, headline
+class: center, headline
 
-## Built the wrong thing
-## Bugs
-## &nbsp;
+### 🚫 Built the wrong thing 🚫
+### 🐛 Bugs 🐛
+### &nbsp;
 
 ???
 # Can't avoid them all
 # Can also be really expensive
 
 ---
-class: center, middle, headline
+class: center, headline
 
-## Built the wrong thing
-## Bugs
-## Security vulnerabilities
+### 🚫 Built the wrong thing 🚫
+### 🐛 Bugs 🐛
+### ⚠️ Security vulnerabilities ⚠️
 
 ???
 # Can be thought of as a bug
@@ -148,7 +148,7 @@ class: center, middle, headline
 ---
 class: center, middle, headline
 
-# Product Design
+## 💡 Product Design 💡
 
 ???
 # All starts here
@@ -158,19 +158,19 @@ class: center, middle, headline
 background-image: url(/assets/images/juicero.jpg)
 
 ???
-# Made a phone for people who don't like phones
+# Made a $400 machine that squeezes a bag into a glass
 # To avoid this, you have two choices
 
 ---
 class: center, middle, headline
 
-## KISS
+## 💋 KISS 💋
 ## &nbsp;
 
 ---
 class: center, middle, headline
 
-## KISS
+## 💋 KISS 💋
 ## Keep It Simple, Stupid
 
 ???
@@ -187,7 +187,7 @@ background-image: url(/assets/images/warehouse.gif)
 ---
 class: center, middle, headline
 
-# Design Sprints
+## 🏃‍♀️ Design Sprints 🏃‍♂️
 
 ???
 # Came out of Google Ventures
@@ -198,71 +198,78 @@ class: center, middle, headline
 
 ![Design sprint](/assets/images/design-sprint.png)
 
+???
+# 5 phases, each over one day
+# You need a good facilitator who knows what they're doing
+
 ---
 class: center, middle, headline
 
 ![](/assets/images/sprint-step1.png)
+
+???
+# Get information from experts and research
 
 ---
 class: center, middle, headline
 
 ![](/assets/images/sprint-step2.png)
 
+???
+# Get as many options as possible
+
 ---
 class: center, middle, headline
 
 ![](/assets/images/sprint-step3.png)
+
+???
+# Narrow options down to one path forward
 
 ---
 class: center, middle, headline
 
 ![](/assets/images/sprint-step4.png)
 
+???
+# Build as much of a prototype as possible in a day
+
 ---
 class: center, middle, headline
 
 ![](/assets/images/sprint-step5.png)
 
+???
+# Get actual users to try your prototype and get feedback
+
 ---
 class: center, middle, headline
 
-# Testing
+# ⚖️  Testing ⚖️
 
 ???
-How many of you have some sort of monitoring/observability platform that allows
-you to monitor production systems?
-
-How many of you test in production?
-
-I have some bad news for you if you put your hand down after the first question
-- you're testing in production! If you had total confidence that your
-application was working 100% correctly in all situations, then
-monitoring/observability is unneeded.
-
-You can't test in production when you don't have access to production devices.
-This makes replicating production-like usage of your application extremely
-important.
-
-Show picture of Facebook mobile testing:
-
-"In each rack, above the tangle of cables and phones, sits a camera, recording
-every onscreen movement in case a developer needs to review a specific hiccup."
-
-A strong type system is really helpful. This gives us a baseline of confidence
-in the "correctness" of your program. Again, if deploying is difficult - or
-impossible - then you really want to find bugs before your users do.
-
-=====================================
-Property testing is extremely helpful (main section - 5 minutes)
-=====================================
+# Move fast &amp; break things - no!
+# Bad user experiences can kill a product
 
 ---
-class: center, middle
+class: center, middle, headline
 
-![](/assets/images/property-testing.jpg)
+![](/assets/images/smart-summon.png)
+
+???
+# And it might not just kill a product, but people!
 
 ---
-class: padding, middle
+class: center, middle, fullscreen-image
+
+![](/assets/images/quickcheck.png)
+
+???
+# Originally for Haskell, available in most languages now
+
+
+---
+class: middle, code-large
 
 ```elixir
 property "sum of two positive integers is greater than both integers" do
@@ -275,81 +282,136 @@ property "sum of two positive integers is greater than both integers" do
 end
 ```
 
----
-class: center, middle, fullscreen-image
+???
+# Simple properties are easy, but it can get difficult
 
-![](/assets/images/quickcheck.png)
+---
+class: middle, code-large
+
+```elixir
+property "sum of two positive integers is greater than both integers" do
+  check all `int1 <- pos_integer()`,
+            `int2 <- pos_integer()` do
+    sum = int1 + int2
+    assert sum > int1
+    assert sum > int2
+  end
+end
+```
+
+???
+# Instead of you figuring out inputs, we generate random ones.
+# This finds the things we couldn't think of!
+
+---
+class: center, middle
+
+![](/assets/images/property-testing.jpg)
+
+???
+# Best book I know, but there are others
 
 ---
 background-image: url(/assets/images/phone_testing.jpg)
 
 ???
-# Observability is testing in production
-# Test in production, but in house! QA is valuable!
+# Who tests in production? Who has observability? Observability is testing in production!
+# Test in production, but in house! Do real QA, and take videos!
 
 ---
 class: center, middle, headline
 
-# Debugging
+## 🐛 Debugging 🐛
 
 ???
-Running an application on dozens of different hardware platforms is really
-tricky to get right! How do you debug when things go wrong?
-
-When it comes to debugging, nothing comes close to the helpfulness of connecting
-to a running OTP application.
-
-Even finding out if you have bugs can be really tricky since you might need
-users to report them, and they often don't.
-
-=================================================
-Show a little bit of the power of the observer (main section - 5 minutes)
-=================================================
-
----
-class: center, middle, headline
-
-# Security
-
-???
-The "S" in IoT stands for security.
-
-I know what many of you might have been thinking a bit. "Why isn't he mentioning
-C or C++ in a talk on embedded software?"
-
-https://www.coreinfrastructure.org/programs/census-project/
-Main Language: If the project’s main language is C or C++, add 2 points.
-
-With great power comes great buffer overflow bugs - Spiderman meme.
-
-You need to be able to do this without opening up your users to huge security
-issues. Especially in my case, where money and financial information is
-involved and it's connected to the internet, we needed to be rock solid.
-
-Do you really want to run code written by strangers on the internet on your
-users' devices?
-
-I love that we trust the OSS community as much as we do, but this is potentially
-dangerous. There are a whole host of possible attack vectors, and the
-combinatorial explosion of possible attack targets makes using dependencies a
-risky business.
-
-Limit your use of dependencies - this basically rules out JavaScript.
+# Help - it's not working!
+# Normally, we look at logs. If we need more, we need to ship...
 
 ---
 class: center, middle, fullscreen-image
 
-![](/assets/images/tangled-shiba.jpg)
+![](/assets/images/observer2.png)
+
+???
+# Connect to the running node without interruption, add logging, get data, etc.
+# This is an absolute SUPERPOWER for debugging. Nothing like it.
+
+---
+class: center, middle, headline
+
+## 🖨️ Debug Mode 🖨️
+
+???
+# Super common in IOT, not in web. Don't forget to add!
+
+---
+class: center, middle, headline
+
+# 🔐 Security 🔐
+
+???
+# The "S" in IoT stands for security.
+# This is so, so important.
+
+---
+class: center, middle, headline
+background-image: url(/assets/images/wannacry.png)
+
+???
+# I really hope you've never seen this before.
+# Vulnerability patched 14 March, 2017. Millions still vulnerable today!
+# Months after the patches, Ukraine severely attacked, hundreds of millions in damage.
+
+---
+class: center, middle
+
+![](/assets/images/cii-parameters.png)
+
+???
+# Not a whole lot we can easily control - language choice is one.
+# Use a safe language. Rust is great, or higher level if you can.
+
+---
+class: center, middle, headline
+
+## 😈 Strangers 😈
+## 😈 on the Internet 😈
+
+???
+# I love OSS, but you must use caution
+# It is reasonable to limit dependencies
+# You cannot assume good intentions with users in your hands
 
 ---
 class: center, middle, fullscreen-image
 
 ![](/assets/images/hacker-shiba.jpg)
 
+???
+# Get experts! They're expensive, but worth it.
+# Pay now or later - your choice.
+
 ---
 class: center, middle, headline
 
-# The Web
+# 🌐 The Web 🌐
+
+???
+# Start small - resist new features!
+# Design sprints are great - try them!
+# Property testing is awesome!
+# Do browser testing &amp; QA!
+# Elixir is awesome!
+# Please care about security!
+# Optimize for shipping!
+
+---
+class: center, middle, headline
+
+## 🤔 But do I have to? 🤔
+
+???
+# Of course not, but it helps our users
 
 ---
 layout: false

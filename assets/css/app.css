@@ -127,7 +127,7 @@ body {
   font-family: 'Droid Serif';
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-family: 'Yanone Kaffeesatz';
   font-weight: normal;
 }
@@ -137,11 +137,18 @@ h1, h2, h3 {
 }
 
 .headline h2 {
-  font-size: 125px;
-  margin: 30px;
+  font-size: 130px;
+  margin-bottom: 30px;
+  margin-top: 30px;
 }
 
 .headline h3 {
+  font-size: 105px;
+  padding-top: 40px;
+  margin: 0px;
+}
+
+.headline h4 {
   font-size: 85px;
   margin: 0px;
 }
@@ -158,6 +165,10 @@ li {
 .remark-code {
   width: fit-content;
   font-size: 20px;
+}
+
+.code-large .remark-code {
+  font-size: 28px;
 }
 
 .remark-slide-content {
@@ -201,10 +212,6 @@ img {
     opacity: .5;
     width: 100%;
     text-align: center;
-}
-
-.gotober-intro .watermark-left {
-  display: none;
 }
 
 .gotober-intro .watermark-left {
