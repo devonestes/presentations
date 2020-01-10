@@ -5,7 +5,7 @@ permalink: /elixir_erlang_concurrency/
 ---
 layout: true
 .watermark-left[@devoncestes]
-.watermark-middle[CBL Berlin 2019]
+.watermark-middle[LambdaDays 2020]
 
 ---
 class: center, middle, headline
@@ -25,35 +25,37 @@ going to be talking about today. Specifically, we're going to be looking at two
 open source examples of some concurrent computation.
 
 ---
-class: center, middle, headline
-
-## Embarrassingly Parallel
-
----
 class: center, middle
 
-![Recursion](/assets/images/recursion.gif)
+![](/assets/images/pattern_language.png)
 
 ???
+A while back a preliminary paper was published on this topic, and that's what
+we're going to use as the basis for today's talk. There are other people who
+have come up with similar terms for these patterns, some of which differ, but
+today we'll be using these terms. I think they're good ones.
 
-This basically means that we have a problem that can be broken down into smaller
-sub-problems. And occasionally those sub-problems can also be broken down
-further as well. And all of these divisions can be run in parallel. You may of
-heard of something called map-reduce before spoken about in this sense - well,
-that's sort of what this is.
+---
+class: center, middle
+
+![](/assets/images/PDSE-algorithm-structure.gif)
+
+???
+For me it all starts at this awesome little flowchart. And before we get into
+this too deeply, let's just cut down our scope a little bit.
 
 ---
 
 class: center, middle
 
-# Benchee vs. ExUnit
+# Benchee vs. ExUnit vs. GenStage
 # &nbsp;
 
 ---
 class: center, middle
 
-# ~~Benchee vs. ExUnit~~
-# Parallel Map vs. Event Manager
+# ~~Benchee vs. ExUnit vs. GenStage~~
+# Reduction vs. Asynchronous Decomposition vs. Pipeline Processing
 
 ???
 
@@ -73,6 +75,23 @@ choices when it comes time to implement something like this yourselves.
 
 The simpler of the two is the parallel map reduce that we do in Benchee. Looking
 at the actual code, it's pretty simple.
+
+---
+class: center, middle, headline
+
+## Embarrassingly Parallel
+
+???
+So there's that fourth one, which has my favorite name out of the bunch by far,
+but the thing is, this one is so simple I didn't think it was worth covring. If
+your language has actors, then this is as simple as just spawning a process and
+letting it do its thing. That's it.
+
+For a canonical exaple, imagine that you have a list of 1,000 email addresses, and
+you want to send an email to all of those people concurrently. Take the literally 8
+seconds needed to come up with a solution to that problem in your language.
+
+That's it. We can move on now, right?
 
 ---
 class: padding

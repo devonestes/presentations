@@ -159,7 +159,8 @@ li {
 
 .remark-code, .remark-inline-code {
   font-family: 'Ubuntu Mono';
-  background-color: rgb(250, 250, 250) !important;
+  background-color: transparent !important;
+  /*background-color: rgb(250, 250, 250) !important;*/
 }
 
 .remark-code {
@@ -172,8 +173,10 @@ li {
 }
 
 .remark-slide-content {
-  background-color: rgb(250, 250, 250) !important;
-  background-size: cover;
+  background-image: url("../images/sketch_template.png") !important;
+  background-size: contain;
+  left: 0;
+  top: 0;
 }
 
 .max-img-width-940 img {
@@ -256,4 +259,7 @@ img {
 
 .remark-code-span-highlighted {
   padding: 0;
+}
+
+.remark-slide {
 }
