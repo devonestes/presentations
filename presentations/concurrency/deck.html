@@ -27,6 +27,11 @@ open source examples of some concurrent computation.
 ---
 class: center, middle
 
+![](/assets/images/sketch_logo.png)
+
+---
+class: center, middle
+
 ![](/assets/images/pattern_language.png)
 
 ???
@@ -47,74 +52,127 @@ this too deeply, let's just cut down our scope a little bit.
 ---
 class: center, middle
 
-![](/assets/images/photo_2020-01-10_21-17-10.jpg)
+![](/assets/images/photo_2020-01-12_15-11-03.jpg)
 
 ---
 class: center, middle
 
-![](/assets/images/photo_2020-01-10_21-17-13.jpg)
+![](/assets/images/photo_2020-01-12_15-11-06.jpg)
 
 ---
 class: center, middle
 
-![](/assets/images/photo_2020-01-10_21-17-15.jpg)
+![](/assets/images/photo_2020-01-12_15-11-09.jpg)
 
 ---
 class: center, middle
 
-![](/assets/images/photo_2020-01-10_21-17-18.jpg)
+![](/assets/images/photo_2020-01-12_15-11-12.jpg)
 
 ---
 class: center, middle
 
-![](/assets/images/photo_2020-01-10_21-17-22.jpg)
+![](/assets/images/photo_2020-01-12_15-11-16.jpg)
 
 ---
 class: center, middle
 
-![](/assets/images/photo_2020-01-10_21-17-24.jpg)
+![](/assets/images/photo_2020-01-12_15-11-19.jpg)
 
 ---
-class: center, middle, max-img-width-940
-
-![](/assets/images/photo_2020-01-10_21-17-27.jpg)
-
----
-class: center, middle, max-img-width-940
-
-![](/assets/images/photo_2020-01-10_21-17-29.jpg)
-
----
-
 class: center, middle
 
-# Benchee vs. ExUnit vs. GenStage
+![](/assets/images/photo_2020-01-12_15-11-22.jpg)
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_15-11-27.jpg)
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_15-11-30.jpg)
+
+---
+class: middle, padding
+
+.center[
+]
+
+.cols[
+.fifty[
+.center[
+]
+
+# Benchee
+# &nbsp;<br>&nbsp;
 # &nbsp;
+]
+
+.fifty[
+.center[
+]
+
+# Reduction
+# &nbsp;<br>&nbsp;
+# &nbsp;
+]
+]
 
 ---
-class: center, middle
+class: middle, padding
 
-# ~~Benchee vs. ExUnit vs. GenStage~~
-# Reduction vs. Asynchronous Decomposition vs. Pipeline Processing
+.center[
+]
+
+.cols[
+.fifty[
+.center[
+]
+
+# Benchee
+# ExUnit<br>&nbsp;
+# &nbsp;
+]
+
+.fifty[
+.center[
+]
+
+# Reduction
+# Asynchronous Decomposition
+# &nbsp;
+]
+]
+
+---
+class: middle, padding
+
+.center[
+]
+
+.cols[
+.fifty[
+.center[
+]
+
+# Benchee
+# ExUnit<br>&nbsp;
+# GenStage
+]
+
+.fifty[
+.center[
+]
+
+# Reduction
+# Asynchronous Decomposition
+# Pipeline Processing
+]
+]
 
 ???
-
-Both ExUnit and Benchee have some parallel computation involved in their
-execution. Specifically, both of these problems are - and I'm not making this
-term up here - embarassingly parallel. This term is for problems that can be
-executed entirely in parallel without any communication between the processes.
-
-Benchee and ExUnit handle this basic problem in two ways. We're going to call
-those two options Parallel Map Reduce and an Event Manager. Each of these
-implementations has some pros and cons - that's like the story of all software,
-right? It's all about tradeoffs.
-
-So, let's look at these two implemenations, discuss the tradeoffs, and hopefully
-we'll have a deeper understanding of these two options so you can make some good
-choices when it comes time to implement something like this yourselves.
-
-The simpler of the two is the parallel map reduce that we do in Benchee. Looking
-at the actual code, it's pretty simple.
 
 ---
 class: center, middle, headline
@@ -132,20 +190,95 @@ you want to send an email to all of those people concurrently. Take the literall
 seconds needed to come up with a solution to that problem in your language.
 
 That's it. We can move on now, right?
+---
+class: padding
+
+.center[
+# Embarrassingly Parallel
+]
+
+```
+def send_emails(emails) do # serial
+  Enum.map(emails, fn email ->
+    send_email(email)
+  end)
+end
+```
 
 ---
 class: padding
 
 .center[
-# Parallel Map
+# Embarrassingly Parallel
 ]
 
 ```
-@spec map(Enum.t(), fun) :: list
-def map(collection, func) do
-  collection
-  |> Enum.map(&Task.async(fn -> func.(&1) end))
-  |> Enum.map(&Task.await(&1, :infinity))
+def send_emails(emails) do # serial
+  Enum.map(emails, fn email ->
+    send_email(email)
+  end)
+end
+
+def send_emails(emails) do # parallel
+  Enum.map(emails, fn email ->
+    spawn(fn -> send_email(email) end)
+  end)
+end
+```
+
+---
+class: padding
+
+.center[
+# Embarrassingly Parallel
+]
+
+```
+def send_emails(emails) do # serial
+  Enum.map(emails, fn email ->
+    send_email(email)
+  end)
+end
+
+def send_emails(emails) do # parallel
+  Enum.map(emails, fn email ->
+    `spawn`(fn -> send_email(email) end)
+  end)
+end
+```
+
+
+
+---
+class: center, middle, headline
+
+## Reduction
+
+???
+Super common, probably more common than embarrasingly parallel.
+
+Think of parallel map, or async/await. It's like embarrasingly
+parallel, but where you actually care about the result.
+
+---
+class: padding
+
+.center[
+# Reduction
+]
+
+```
+defmodule Parallel do
+  def map(collection, func) do
+    refs =
+      Enum.map(collection, fn element ->
+        Task.async(fn -> func.(element) end)
+      end)
+
+    Enum.map(refs, fn ref ->
+      Task.await(ref, :infinity))
+    end)
+  end
 end
 ```
 
@@ -163,16 +296,23 @@ to know what's actually going on in those Task functions.
 class: padding
 
 .center[
-# Parallel Map
+# Reduction
 ]
 
 ```
-@spec map(Enum.t(), fun) :: list
-def map(collection, func) do
-  collection
-  |> Enum.map(&`Task.async`(fn -> func.(&1) end))
-  |> Enum.map(&`Task.await`(&1, :infinity))
+defmodule Parallel do
+  def map(collection, func) do
+    refs =
+      Enum.map(collection, fn element ->
+        `Task.async`(fn -> func.(element) end)
+      end)
+
+    Enum.map(refs, fn ref ->
+      `Task.await`(ref, :infinity))
+    end)
+  end
 end
+
 ```
 
 ???
@@ -525,30 +665,16 @@ This is also where I have to put the disclaimer that handling all the myriad
 failure possiblities with distributed systems is extremely complicated, and that
 this won't reliably work in production. But still, it's cool, right?!
 
-
-
 ---
-class: center, middle
+class: center, middle, headline
 
-# `Task.yield`
-# `Task.async_stream`
-
-???
-
-So this is one important thing to consider here. When we're mapping over the
-elements in that list, we're blocking on each element in order. This is nice and
-simple, but it does have some drawbacks. The Task module is rather simple and
-really cool, and it's a super example of OTP if that's something that you're
-still a little confused by. There's supervision and all that stuff going on
-there, so I'd really encourage y'all to check itout.
-
-But this stuff, as cool as it is, wouldn't work for ExUnit. Let's look at why.
+## Asynchronous Decomposition
 
 ---
 class: padding
 
 .center[
-# Event Manager
+# Asynchronous Decomposition
 ]
 
 ```
@@ -584,8 +710,8 @@ complicated than what we had before. Could we simplify this?
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -605,8 +731,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -624,8 +750,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -644,8 +770,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -664,8 +790,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -684,8 +810,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -704,8 +830,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -724,8 +850,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -744,8 +870,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -775,8 +901,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -806,8 +932,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -837,8 +963,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -868,8 +994,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -899,8 +1025,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -930,8 +1056,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -960,8 +1086,8 @@ end
 ---
 class: padding
 
-.hidden[
-# _
+.center[
+# Asynchronous Decomposition
 ]
 
 ```
@@ -1040,7 +1166,7 @@ class: center, middle
 class: padding
 
 .center[
-# ExUnit As Parallel Map
+# ExUnit As Reduction
 ]
 
 ```
@@ -1081,17 +1207,7 @@ that originally and expanded on it over the years.
 ---
 class: padding, center, headline, middle
 
-## Event Manager
-### as (kind of) a
 ## State Machine
-
----
-class: middle, center, headline
-
-## State Machines are great!
-
-### `:gen_statem`
-### `:gen_event`
 
 ---
 

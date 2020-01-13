@@ -1,0 +1,76 @@
+digraph {
+  { 
+    node [margin=0]
+
+    Start [shape=star penwidth=3 fixedsize=true width=1.4 height=1.4]
+
+    OrganizeByOrdering [shape=rect fixedsize=true width=1.9 height=0.7 penwidth=3]
+    OrganizeByTasks [shape=rect fixedsize=true width=1.9 height=0.7 penwidth=3]
+    OrganizeByData [shape=rect fixedsize=true width=1.9 height=0.7 penwidth=3]
+    Partitioning [shape=rect fixedsize=true width=1.9 height=0.7 penwidth=3]
+    Tree [shape=rect fixedsize=true width=1.9 height=0.7 penwidth=3]
+
+    "Pipeline\nProcessing" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Asynchronous\nDecomposition" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Embarassingly\nParallel" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Reduction" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Shared\nMemory" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Balanced\nTree" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Divide And\nConquor" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Geometric\nDecomposition" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+    "Reference\nFollowing" [shape=doublecircle fixedsize=true width=1.35 penwidth=3]
+
+    DataLinear [label="Linear?" shape=rect fixedsize=true width=1.6 height=0.8]
+    DataRecursive [label="Recursive?" shape=rect fixedsize=true width=1.6 height=0.8]
+    "Seperable\nDependencies?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Inseperable\nDependencies?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Regular?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Irregular?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Linear?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Recursive?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Dependent?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Independent?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "One\nWay?" [shape=rect fixedsize=true width=1.6 height=0.8]
+    "Two\nWay?" [shape=rect fixedsize=true width=1.6 height=0.8]
+  }
+  Start -> OrganizeByOrdering
+  Start -> OrganizeByTasks
+  Start -> OrganizeByData
+
+  OrganizeByOrdering -> "Regular?"
+  "Regular?" -> "Pipeline\nProcessing"
+
+  OrganizeByOrdering -> "Irregular?"
+  "Irregular?" -> "Asynchronous\nDecomposition"
+
+  OrganizeByTasks -> "Linear?"
+
+  "Linear?" -> Partitioning
+
+  Partitioning -> "Dependent?"
+
+  "Dependent?" -> "Seperable\nDependencies?"
+  "Seperable\nDependencies?" -> "Reduction"
+
+  "Dependent?" -> "Inseperable\nDependencies?"
+  "Inseperable\nDependencies?" -> "Shared\nMemory"
+
+  Partitioning -> "Independent?"
+  "Independent?" -> "Embarassingly\nParallel"
+
+  OrganizeByTasks -> "Recursive?"
+  "Recursive?" -> Tree
+
+  Tree -> "One\nWay?"
+  "One\nWay?" -> "Balanced\nTree"
+
+  Tree -> "Two\nWay?"
+  "Two\nWay?" -> "Divide And\nConquor"
+
+  OrganizeByData -> DataLinear
+  DataLinear -> "Geometric\nDecomposition"
+
+  OrganizeByData -> DataRecursive
+  DataRecursive -> "Reference\nFollowing"
+
+}
