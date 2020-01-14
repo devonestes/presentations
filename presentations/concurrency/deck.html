@@ -247,7 +247,87 @@ def send_emails(emails) do # parallel
 end
 ```
 
+---
+class: center, middle
 
+![](/assets/images/photo_2020-01-12_21-59-12.jpg)
+
+???
+1
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-59-08.jpg)
+
+???
+2
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-46.jpg)
+
+???
+3
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-54.jpg)
+
+???
+6
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-58.jpg)
+
+???
+7
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-44.jpg)
+
+???
+5
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-41.jpg)
+
+???
+12
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-35.jpg)
+
+???
+10
+---
+
+class: padding
+
+.center[
+# Embarrassingly Parallel
+]
+
+- ## Tasks are independent
+
+--
+
+- ## No communication
+
+--
+
+- ## No coordination
+
+--
+
+- ## Just set it - and forget it!
 
 ---
 class: center, middle, headline
@@ -630,6 +710,33 @@ class: center, middle
 ![](/assets/images/IMG_0221_edit.PNG)
 
 ---
+
+class: padding
+
+.center[
+# Basic async & await
+]
+
+```
+def async(func) do
+  ref = make_ref()
+  me = self()
+  spawn(fn -> send(me, {ref, func()}) end)
+  ref
+end
+```
+
+```
+def await(ref, timeout \\ :infinity) do
+  receive do
+    {^ref, value} -> value
+    after timeout -> {:error, :timeout}
+  end
+end
+```
+
+
+---
 class: padding
 
 .center[
@@ -664,6 +771,27 @@ to a distributed map-reduce is just that easy!
 This is also where I have to put the disclaimer that handling all the myriad
 failure possiblities with distributed systems is extremely complicated, and that
 this won't reliably work in production. But still, it's cool, right?!
+
+---
+class: padding
+
+.center[
+# Reduction
+]
+
+- ## Ordered, fixed size collections (eager evaluation)
+
+--
+
+- ## No shared dependencies between partitions
+
+--
+
+- ## No communication between partitions
+
+--
+
+- ## Communication/coordination with parent allowed
 
 ---
 class: center, middle, headline
@@ -1166,6 +1294,27 @@ class: center, middle
 class: padding
 
 .center[
+# Asynchronous Decomposition
+]
+
+- ## Collection of unknown size (lazy evaluation)
+
+--
+
+- ## No dependencies between partitions
+
+--
+
+- ## No communication between partitions
+
+--
+
+- ## Communication/coordination with parent allowed
+
+---
+class: padding
+
+.center[
 # ExUnit As Reduction
 ]
 
@@ -1208,6 +1357,160 @@ that originally and expanded on it over the years.
 class: padding, center, headline, middle
 
 ## State Machine
+
+???
+
+The hard part of this pattern is that we don't know when we're done because we're loading our
+colleciton asynchronously. That means we need some way to keep track of that, and a state machine
+is a great way to do that!
+
+---
+class: padding, center, headline, middle
+
+## Pipeline Processing
+
+???
+
+This one should sound pretty familiar, and it is! The general idea is simple, but the thing is, if
+you do the simple thing, you're pretty quickly going to end up with some headaches. That's why for
+this one I'm going to show you a properly good implementation.
+
+THe other reason I'm not going to show code for this one is because, frankly, you shouldn't write
+one of these yourself. You should definitely know when to reach for this pattern, but you should
+also know that when that time comes to use a well written library.
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-28.jpg)
+
+???
+1
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-25.jpg)
+
+???
+2
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-23.jpg)
+
+???
+3
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-14.jpg)
+
+???
+4
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-11.jpg)
+
+???
+5
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-58-08.jpg)
+
+???
+6
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-34.jpg)
+
+???
+7
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-37.jpg)
+
+???
+8
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-41.jpg)
+
+???
+9
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-44.jpg)
+
+???
+10
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-47.jpg)
+
+???
+11
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-49.jpg)
+
+???
+12
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-54.jpg)
+
+???
+13
+
+---
+class: center, middle
+
+![](/assets/images/photo_2020-01-12_21-57-57.jpg)
+
+???
+14
+
+---
+class: padding
+
+.center[
+# Pipeline processing
+]
+
+- ## Stream (possibly infinite) of data or events
+
+--
+
+- ## Clearly defined communication between stages
+
+--
+
+- ## Dependencies between processes allowed
+
+--
+
+- ## Communication between consumer and parent allowed
 
 ---
 
