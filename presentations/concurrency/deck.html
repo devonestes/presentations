@@ -14,20 +14,11 @@ class: center, middle, headline
 ### in Elixir and Erlang
 
 ???
-My name is Devon...
-
-One of the things that many people love about the BEAM is the wonderful support
-for concurrent computation. Not just concurrent, but truly parallel. If you want
-to peg all of your CPU cores at 100%, you can easily do that thanks to the BEAM.
-
-But the thing is, you still need to design those systems. And that's what we're
-going to be talking about today. Specifically, we're going to be looking at two
-open source examples of some concurrent computation.
-
----
-class: center, middle
-
-![](/assets/images/sketch_logo.png)
+* Who here knows Erlang / Elixir?
+* Process is an Actor.
+* They communicate through message passing, and each process has an ordered inbox.
+* Concurrency & Parallelism are great, but you need to know how to use them.
+* People are thinking about these things.
 
 ---
 class: center, middle
@@ -35,10 +26,37 @@ class: center, middle
 ![](/assets/images/pattern_language.png)
 
 ???
-A while back a preliminary paper was published on this topic, and that's what
-we're going to use as the basis for today's talk. There are other people who
-have come up with similar terms for these patterns, some of which differ, but
-today we'll be using these terms. I think they're good ones.
+* Paper first published in 1999.
+* Patterns are great, because they give us shared vocabulary.
+* This makes communication easier, and that's the hard part of programming.
+
+---
+class: center, middle
+
+![](/assets/images/ppp.jpg)
+
+???
+* Published by Addison-Wesley in 2004
+* Great acronym!
+
+---
+class: center, middle, headline
+
+## <span class="red">C</span>omparing <span class="red">C</span>ommon <span class="red">C</span>oncurrency <span class="red">P</span>atterns
+### in Elixir and Erlang
+
+???
+
+* I had kind of hoped there would be a really good acronym for the title for this talk.
+
+---
+class: center, middle
+
+![](/assets/images/cccp_hockey.jpg)
+
+???
+
+* But then I remembered that this one was sort of taken already.
 
 ---
 class: center, middle
@@ -46,18 +64,43 @@ class: center, middle
 ![](/assets/images/PDSE-algorithm-structure.gif)
 
 ???
-For me it all starts at this awesome little flowchart. And before we get into
-this too deeply, let's just cut down our scope a little bit.
+
+* The highlight (for me) from that original paper is this chart.
+* It shows the basic layout of the patterns they identify and named.
+* Now, because it's a 20 year old paper that was kind of hard to read, so I made this.
 
 ---
 class: center, middle
 
 ![](/assets/images/photo_2020-01-12_15-11-03.jpg)
 
+???
+
+* Now we see that we start at the beginning, and there are decision points that help us get to our
+final pattern.
+* Usually patterns aren't prescriptions, but in this case they are!
+* But not all of them are really _for_ us.
+* 20 years ago - and really to an extent still today - most people thinking about this aren't
+thiking at our scale.
+
+---
+class: center, middle
+
+![](/assets/images/supercomptuer.jpg)
+
+???
+
+* A lot of the research on this is for people doing theoritical astrophysics simulations with
+giant supercomputers trying to do as much vector math as they can.
+* But that doesn't mean we can't still benefit from a bit of this!
+* Even though we aren't (and shouldn't) just do what they do cause "it's what they do at Google."
+
 ---
 class: center, middle
 
 ![](/assets/images/photo_2020-01-12_15-11-06.jpg)
+
+???
 
 ---
 class: center, middle
@@ -94,85 +137,89 @@ class: center, middle
 
 ![](/assets/images/photo_2020-01-12_15-11-30.jpg)
 
+???
+
+* So today we're going to look at three examples from open source.
+* We'll look at some code, and we'll also look at some pictures.
+
 ---
 class: middle, padding
 
-.center[
-]
-
 .cols[
 .fifty[
-.center[
-]
+.right[
 
-# Benchee
+# Benchee&nbsp;&nbsp;&nbsp;&nbsp;
 # &nbsp;<br>&nbsp;
-# &nbsp;
-]
-
-.fifty[
-.center[
-]
-
-# Reduction
 # &nbsp;<br>&nbsp;
-# &nbsp;
+
+]
+]
+
+.fifty[
+
+# &nbsp;&nbsp;Reduction
+# &nbsp;<br>&nbsp;
+# &nbsp;<br>&nbsp;
+
 ]
 ]
 
 ---
 class: middle, padding
 
-.center[
-]
-
 .cols[
 .fifty[
-.center[
-]
+.right[
 
-# Benchee
-# ExUnit<br>&nbsp;
-# &nbsp;
+# Benchee&nbsp;&nbsp;&nbsp;&nbsp;
+# ExUnit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;
+# &nbsp;<br>&nbsp;
+
+]
 ]
 
 .fifty[
-.center[
-]
+.left[
 
-# Reduction
-# Asynchronous Decomposition
-# &nbsp;
+# &nbsp;&nbsp;Reduction
+# &nbsp;&nbsp;Asynchronous<br>&nbsp;&nbsp;Decomposition
+# &nbsp;<br>&nbsp;
+
+]
 ]
 ]
 
 ---
 class: middle, padding
 
-.center[
-]
-
 .cols[
 .fifty[
-.center[
-]
+.right[
 
-# Benchee
-# ExUnit<br>&nbsp;
-# GenStage
+# Benchee&nbsp;&nbsp;&nbsp;&nbsp;
+# ExUnit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;&nbsp;
+# GenStage&nbsp;&nbsp;
+
+]
 ]
 
 .fifty[
-.center[
-]
+.left[
 
-# Reduction
-# Asynchronous Decomposition
-# Pipeline Processing
+# &nbsp;&nbsp;Reduction
+# &nbsp;&nbsp;Asynchronous<br>&nbsp;&nbsp;Decomposition
+# &nbsp;&nbsp;Pipeline<br>&nbsp;&nbsp;Processing
+
+]
 ]
 ]
 
 ???
+
+* So you may have noticed there were four green circles previously, but I only mentioned three
+projects!
+* Fourth one is so simple we can just cover it quickly.
 
 ---
 class: center, middle, headline
@@ -180,16 +227,10 @@ class: center, middle, headline
 ## Embarrassingly Parallel
 
 ???
-So there's that fourth one, which has my favorite name out of the bunch by far,
-but the thing is, this one is so simple I didn't think it was worth covring. If
-your language has actors, then this is as simple as just spawning a process and
-letting it do its thing. That's it.
 
-For a canonical exaple, imagine that you have a list of 1,000 email addresses, and
-you want to send an email to all of those people concurrently. Take the literally 8
-seconds needed to come up with a solution to that problem in your language.
+* Best name of them all!
+* One example is sending emails.
 
-That's it. We can move on now, right?
 ---
 class: padding
 
@@ -204,6 +245,10 @@ def send_emails(emails) do # serial
   end)
 end
 ```
+
+???
+
+* Here we map over the list of emails, sending them in series.
 
 ---
 class: padding
@@ -226,6 +271,10 @@ def send_emails(emails) do # parallel
 end
 ```
 
+???
+
+* Making this paralell is as simple as spawning one process per email.
+
 ---
 class: padding
 
@@ -247,13 +296,16 @@ def send_emails(emails) do # parallel
 end
 ```
 
+???
+
+* Now they all send in parallel - great!
+
 ---
 class: center, middle
 
 ![](/assets/images/photo_2020-01-12_21-59-12.jpg)
 
 ???
-1
 
 ---
 class: center, middle
@@ -261,7 +313,6 @@ class: center, middle
 ![](/assets/images/photo_2020-01-12_21-59-08.jpg)
 
 ???
-2
 
 ---
 class: center, middle
@@ -269,7 +320,6 @@ class: center, middle
 ![](/assets/images/photo_2020-01-12_21-58-46.jpg)
 
 ???
-3
 
 ---
 class: center, middle
@@ -277,14 +327,13 @@ class: center, middle
 ![](/assets/images/photo_2020-01-12_21-58-54.jpg)
 
 ???
-6
+
 ---
 class: center, middle
 
 ![](/assets/images/photo_2020-01-12_21-58-58.jpg)
 
 ???
-7
 
 ---
 class: center, middle
@@ -292,21 +341,21 @@ class: center, middle
 ![](/assets/images/photo_2020-01-12_21-58-44.jpg)
 
 ???
-5
+
 ---
 class: center, middle
 
 ![](/assets/images/photo_2020-01-12_21-58-41.jpg)
 
 ???
-12
+
 ---
 class: center, middle
 
 ![](/assets/images/photo_2020-01-12_21-58-35.jpg)
 
 ???
-10
+
 ---
 
 class: padding
@@ -315,19 +364,24 @@ class: padding
 # Embarrassingly Parallel
 ]
 
-- ## Tasks are independent
+- ## Eagerly evaluated, linear input
 
 --
 
-- ## No communication
+- ## No communication with parent
 
 --
 
-- ## No coordination
+- ## No communication with siblings
 
 --
 
-- ## Just set it - and forget it!
+- ## No shared dependencies between siblings
+
+???
+
+* Simplest, and probably one of the more common ones.
+* But the most common one gives us just a little bit more.
 
 ---
 class: center, middle, headline
@@ -335,10 +389,9 @@ class: center, middle, headline
 ## Reduction
 
 ???
-Super common, probably more common than embarrasingly parallel.
 
-Think of parallel map, or async/await. It's like embarrasingly
-parallel, but where you actually care about the result.
+* This one may be know by its other names - async/await & map/reduce.
+* Quite a lot like Embarrassingly Parallel, but with one important difference.
 
 ---
 class: padding
@@ -364,13 +417,8 @@ end
 
 ???
 
-We have a collection here that we can map over, and we have a function that is
-going to be applied for each element in the collection. We're using the
-wonderful Task module for this to run these operations in parallel, and then
-waiting for all of them to finish.
-
-But I want to go one level deeper here, because I think it's kind of important
-to know what's actually going on in those Task functions.
+* We map over our input, partitioning it in some fashion (one element per child process)
+* Then reduce the output of that partitioned work back into a single result.
 
 ---
 class: padding
@@ -397,13 +445,8 @@ end
 
 ???
 
-We have a collection here that we can map over, and we have a function that is
-going to be applied for each element in the collection. We're using the
-wonderful Task module for this to run these operations in parallel, and then
-waiting for all of them to finish.
-
-But I want to go one level deeper here, because I think it's kind of important
-to know what's actually going on in those Task functions.
+* We get a lot from the Task module
+* I think it's important to go one level deeper here.
 
 ---
 
@@ -622,11 +665,10 @@ end
 
 ???
 
-This is an extremely simplified version of what's going on in those functions,
-but the important parts are still there. The most important thing to see here is
-that while we _are_ doing all of the computation in parallel, we're blocking
-this process with those receive blocks until all of the functions that we're
-processing in parallel finish.
+* Map in parallel, but reduction in series.
+* Other ways to optimize, but this is generally ok.
+* You could technically do this recursively for partitions of partitions.
+* Let's look at an example to make it more clear.
 
 ---
 class: padding
@@ -664,10 +706,8 @@ Time.utc_now().second              #=> 51
 
 ???
 
-So, if we do something like this, we will get one message in one second, and
-then our process won't receive the third and fourth messages until after that
-second message is received. It'll be in the mailbox for sure, but it won't be
-received by the process because we're receiving things in specific order there.
+* The computation is done in parallel, but reduce is done in series.
+* And now in pictures!
 
 ---
 class: center, middle
@@ -724,9 +764,7 @@ def async(func) do
   spawn(fn -> send(me, {ref, func()}) end)
   ref
 end
-```
 
-```
 def await(ref, timeout \\ :infinity) do
   receive do
     {^ref, value} -> value
@@ -735,6 +773,11 @@ def await(ref, timeout \\ :infinity) do
 end
 ```
 
+???
+
+* Technically this is unrelated, but I think it's just so cool, I love to show it.
+* Eat up all CPU on my machine - what about all machines?
+* You may have heard someone say that with Actors, distribution is "free".
 
 ---
 class: padding
@@ -761,16 +804,7 @@ end
 
 ???
 
-And this is only tangentially related, but I always like showing it because it's
-just so damn cool. Before what we had was an implementation that was using 100%
-of the CPU cycles on our node. But now, what we have here with literally one
-line changed, and only barely so, is a distributed implementation that will use
-100% of the CPU cycles on every node in our cluster. Going from a single machine
-to a distributed map-reduce is just that easy!
-
-This is also where I have to put the disclaimer that handling all the myriad
-failure possiblities with distributed systems is extremely complicated, and that
-this won't reliably work in production. But still, it's cool, right?!
+* Yes, distribution is hard and full of gnarly edge cases, but this is really cool, right?
 
 ---
 class: padding
@@ -779,24 +813,36 @@ class: padding
 # Reduction
 ]
 
-- ## Ordered, fixed size collections (eager evaluation)
+- ## Eagerly evaluated, linear input
 
 --
 
-- ## No shared dependencies between partitions
+- ## Communication with parent allowed!
 
 --
 
-- ## No communication between partitions
+- ## No communication between children
 
 --
 
-- ## Communication/coordination with parent allowed
+- ## No shared dependencies between children
+
+???
+
+* What about when our input isn't eagerly evaluated?
+* This is one where we have a huge advantage over the academics.
 
 ---
 class: center, middle, headline
 
 ## Asynchronous Decomposition
+
+???
+
+* As you might imagine, dealing with data structures of unknown - and posssibly infinite! - size
+is a real bummer in languages like C where you need to pre-allocate memory.
+* For us it's not so bad, but I think it's still significant enough of a differnce to deserve its
+own pattern.
 
 ---
 class: padding
@@ -829,11 +875,11 @@ end
 
 ???
 
-Ok, so this is an extremely simple version of how ExUnit runs your tests. But,
-you'll see here that we're running some modules in parallel, and others in
-sequence. We have that EventManager that seems to be really important. What we
-have here is a lot of flexibility, which is awesome. It's also far more
-complicated than what we had before. Could we simplify this?
+* On the face of it, you might think that this problem - run a bunch of tests in parallel - is
+just another Reduction.
+* In Elixir, test files aren't compiled - they're only compiled at run time.
+* The process doing the partitioning (the parent) doesn't know exactly how much stuff it's going
+to handle.
 
 ---
 class: padding
@@ -894,6 +940,10 @@ def loop(:async) do
   end
 end
 ```
+
+???
+
+* Here's where we have our asynchronous decomposition.
 
 ---
 class: padding
@@ -1240,16 +1290,13 @@ end
 
 ???
 
-Ok, so this is an extremely simple version of how ExUnit runs your tests. But,
-you'll see here that we're running some modules in parallel, and others in
-sequence. We have that EventManager that seems to be really important. What we
-have here is a lot of flexibility, which is awesome. It's also far more
-complicated than what we had before. Could we simplify this?
+* This is all of course super simplified, but the gist of it I think is super interesting.
 
 ---
 class: center, middle
 
 ![](/assets/images/IMG_0223_edit.PNG)
+
 
 ---
 class: center, middle
@@ -1297,19 +1344,27 @@ class: padding
 # Asynchronous Decomposition
 ]
 
-- ## Collection of unknown size (lazy evaluation)
+- ## Lazily evaluated input of unknown size
 
 --
 
-- ## No dependencies between partitions
+- ## Communication with parent allowed
 
 --
 
-- ## No communication between partitions
+- ## No communication between siblings
 
 --
 
-- ## Communication/coordination with parent allowed
+- ## No shared dependencies between siblings
+
+???
+
+* Trust me - if you run your tests in parallel with shared dependencies it's going to be a really
+bummer.
+* Dependencies are more than just what's in memory! Databases, file systems, third-party
+dependencies, etc!
+* Could we simplify this and use Reduction here instead?
 
 ---
 class: padding
@@ -1320,49 +1375,22 @@ class: padding
 
 ```
 def run() do
-  load_modules()
-  |> Parallel.map(&run_module/1)
-  |> format_results()
+  {sync_modules, async_modules} = load_modules()
+
+  results =
+    Parallel.map(async_modules, &run_module/1) ++
+      Enum.map(sync_modules, &run_module/1)
+
+  format_results(results)
 end
 ```
 
 ???
 
-This is much simpler! It will load all of our modules at once, and then it will
-run all of those modules in parallel. This is super easy, but it doesn't
-actually do what ExUnit needs, and that's why they use that EventManager
-pattern.
-
-The EventManager offers flexiblity to do really cool stuff, including mixing
-parallel and serial computation. It's basically a GenServer that's holding all
-the state for the process and listening to multiple possible messages. When we
-do parallel map that's such a simple and kind of dumb solution, but it's also
-really a great option for most cases where you need parallel computation.
-
-But the EventManager handles that complexity quite well by providing a neat
-interface and hiding all of the complexity from its caller. Looking at my
-simplified version of ExUnit's runner there, we can get a pretty good idea of
-what's going on in that module without having to look at the implementation.
-
-I also really like that the EventManager here can sort of be seen as a fancy
-state machine! I guess it's like some sort of state machine that's made up of
-other state machines (because recursion is everywhere in nature), but that - to
-me at least - makes a lot of sense conceptually and I think aides both in
-understanding this problem and in maintaining this code. As someone who has done
-a fair amount of work on this part of ExUnit over the years, it was super simple
-for me to dive in and make those changes, so kudos to the folks that designed
-that originally and expanded on it over the years.
-
----
-class: padding, center, headline, middle
-
-## State Machine
-
-???
-
-The hard part of this pattern is that we don't know when we're done because we're loading our
-colleciton asynchronously. That means we need some way to keep track of that, and a state machine
-is a great way to do that!
+* Yeah, sure, kind of! It would be slower, but it would indeed work.
+* The big difference here again is just the input - eagerly or lazily evaluated.
+* Again, this is a much bigger difference when you're working in C or something, but it's still
+important for clear communication.
 
 ---
 class: padding, center, headline, middle
@@ -1371,13 +1399,11 @@ class: padding, center, headline, middle
 
 ???
 
-This one should sound pretty familiar, and it is! The general idea is simple, but the thing is, if
-you do the simple thing, you're pretty quickly going to end up with some headaches. That's why for
-this one I'm going to show you a properly good implementation.
-
-THe other reason I'm not going to show code for this one is because, frankly, you shouldn't write
-one of these yourself. You should definitely know when to reach for this pattern, but you should
-also know that when that time comes to use a well written library.
+* The other great thing about Asynchronous Decomposition is how it serves as a sort of middle
+groud to this next pattern.
+* This is what it sounds like. You may have heard of or seen other examples of this in the past.
+* The thing is, doing this _right_ is actually quite hard, and so if you need to reach for this,
+you really don't want to write your own.
 
 ---
 class: center, middle
@@ -1498,164 +1524,84 @@ class: padding
 # Pipeline processing
 ]
 
-- ## Stream (possibly infinite) of data or events
+- ## Lazily evaluated collection of unknown size
 
 --
 
-- ## Clearly defined communication between stages
+- ## Communication with parent allowed (rare)
 
 --
 
-- ## Dependencies between processes allowed
+- ## Dependencies between sibilings allowed
 
 --
 
-- ## Communication between consumer and parent allowed
-
----
-
-.center[
-.headline[
-## The tradeoffs
-]
-]
-
-.cols[
-.fifty[
-.center[
-.headline[
-### Parallel Map
-]
-]
-]
-
-.fifty[
-.center[
-.headline[
-### Event Manager
-]
-]
-]
-]
-
----
-
-.center[
-.headline[
-## The tradeoffs
-]
-]
-
-.cols[
-.fifty[
-.center[
-.headline[
-### Parallel Map
-]
-]
-
-- Simple!
-]
-
-.fifty[
-.center[
-.headline[
-### Event Manager
-]
-]
-
-- Complex (but still not so bad)
-]
-]
-
----
-
-.center[
-.headline[
-## The tradeoffs
-]
-]
-
-.cols[
-.fifty[
-.center[
-.headline[
-### Parallel Map
-]
-]
-
-- Simple!
-- Rigid
-]
-
-.fifty[
-.center[
-.headline[
-### Event Manager
-]
-]
-
-- Complex (but still not so bad)
-- Totally flexible
-]
-]
-
-
----
-
-.center[
-.headline[
-## The tradeoffs
-]
-]
-
-.cols[
-.fifty[
-.center[
-.headline[
-### Parallel Map
-]
-]
-
-- Simple!
-- Rigid
-- No coordination between units
-]
-
-.fifty[
-.center[
-.headline[
-### Event Manager
-]
-]
-
-- Complex (but still not so bad)
-- Totally flexible
-- Single point of coordination between units (great for side effects)
-]
-]
-
-???
-
-And so, like most things, we come down to tradeoffs. And like most tradeoffs,
-we're trading simplicity for flexibility. The simplest thing is indeed still
-quite good, and can even be improved rather easily if you like.
-
-I would strongly encourage you all to start with something really simple like a
-parallel map when you're adding concurrency to your applictions. 99 times out of
-100 that's probably going to get you pretty far.
-
-But, the minute that simple pattern stops working for you, I strongly encourage
-you to create some sort of managed interface for your concurent operation. Try
-thinking about your operation as a state machine. Ask yourself questions like
-"Where do I start? What states can this process be in? What are the triggers
-for moving between states?" I find that if you ask yourself these kinds of
-questions, a really elegant and natural interface for your manager just sort of
-falls into place.
-
-State machines are really nifty, ya know?!
+- ## Shared dependencies allowed (but require management)
 
 ---
 class: center, middle, headline
 
-# Thank you!
+## Summary
+
+|                                        | Input evaluation      | Communication<br>w/ parent  | Communication<br>w/ siblings  | Shared dependencies  |
+|----------------------------------------|-----------------------|-----------------------------|-----------------------------------------|----------------------|
+| <h5>Embarrassingly<br>Parallel</h5>    | Eager                 | No                          | No                                      | No                   |
+| <h5>&nbsp;</h5>   |          &nbsp;     |    &nbsp;                 |       &nbsp;               |    &nbsp;            |
+| <h5>&nbsp;<br>&nbsp;</h5>   |          &nbsp;     |    &nbsp;                 |       &nbsp;               |    &nbsp;            |
+| <h5>&nbsp;<br>&nbsp;</h5>   |          &nbsp;     |    &nbsp;                 |       &nbsp;               |    &nbsp;            |
+
+???
+
+* We've seen the four big ones, let's just go over one more time the characteristics of each of
+them.
+
+---
+class: center, middle, headline
+
+## Summary
+
+|                                        | Input evaluation      | Communication<br>w/ parent  | Communication<br>w/ siblings  | Shared dependencies  |
+|----------------------------------------|-----------------------|-----------------------------|-----------------------------------------|----------------------|
+| <h5>Embarrassingly<br>Parallel</h5>    | Eager                 | No                          | No                                      | No                   |
+| <h5>Reduction</h5>                     | Eager                 | Yes                         | No                                      | No                   |
+| <h5>&nbsp;<br>&nbsp;</h5>   |          &nbsp;     |    &nbsp;                 |       &nbsp;               |    &nbsp;            |
+| <h5>&nbsp;<br>&nbsp;</h5>   |          &nbsp;     |    &nbsp;                 |       &nbsp;               |    &nbsp;            |
+
+---
+class: center, middle, headline
+
+## Summary
+
+|                                        | Input evaluation      | Communication<br>w/ parent  | Communication<br>w/ siblings  | Shared dependencies  |
+|----------------------------------------|-----------------------|-----------------------------|-----------------------------------------|----------------------|
+| <h5>Embarrassingly<br>Parallel</h5>    | Eager                 | No                          | No                                      | No                   |
+| <h5>Reduction</h5>                     | Eager                 | Yes                         | No                                      | No                   |
+| <h5>Asynchronous<br>Decomposition</h5> | Lazy                  | Yes                         | No                                      | No                   |
+| <h5>&nbsp;<br>&nbsp;</h5>   |          &nbsp;     |    &nbsp;                 |       &nbsp;               |    &nbsp;            |
+---
+class: center, middle, headline
+
+## Summary
+
+|                                        | Input evaluation      | Communication<br>w/ parent  | Communication<br>w/ siblings  | Shared dependencies  |
+|----------------------------------------|-----------------------|-----------------------------|-----------------------------------------|----------------------|
+| <h5>Embarrassingly<br>Parallel</h5>    | Eager                 | No                          | No                                      | No                   |
+| <h5>Reduction</h5>                     | Eager                 | Yes                         | No                                      | No                   |
+| <h5>Asynchronous<br>Decomposition</h5> | Lazy                  | Yes                         | No                                      | No                   |
+| <h5>Pipeline<br>Processing</h5>        | Lazy                  | Yes                         | Yes                                     | Yes                  |
+
+---
+class: center, middle
+
+![](/assets/images/sketch_logo.png)
+
+???
+
+* Big thank you to Sketch for supporting me in speaking here today.
+* We are indeed hiring for Elixir positions, so if you're curious about what we're doing there
+come and chat!
+
+---
+class: center, middle, headline
+
+# Thank you! 🇵🇱

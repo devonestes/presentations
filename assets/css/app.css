@@ -132,6 +132,16 @@ h1, h2, h3, h4 {
   font-weight: normal;
 }
 
+.remark-slide-content h1 {
+  font-size: 80px;
+  margin-block-start: 0em;
+  margin-block-end: 0.3em;
+}
+
+.remark-slide-content h2 {
+  font-size: 40px;
+}
+
 .headline h1 {
   font-size: 200px;
 }
@@ -151,6 +161,20 @@ h1, h2, h3, h4 {
 .headline h4 {
   font-size: 85px;
   margin: 0px;
+}
+
+.headline h5 {
+  font-size: 25px;
+  margin: 0;
+}
+
+th {
+  font-size: 25px;
+  padding: 10px;
+}
+
+td {
+  padding: 10px;
 }
 
 li {
@@ -174,9 +198,9 @@ li {
 
 .remark-slide-content {
   background-image: url("../images/sketch_template.png") !important;
+  background-attachment: fixed;
   background-size: contain;
-  left: 0;
-  top: 0;
+  background-position: 0 0;
 }
 
 .max-img-width-940 img {
@@ -189,8 +213,12 @@ li {
 }
 
 img {
-  max-height: 600px;
-  max-width: 1050px;
+  max-height: 500px;
+  max-width: 850px;
+}
+
+.red {
+  color: red;
 }
 
 .fullscreen-image img {
