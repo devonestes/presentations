@@ -209,7 +209,8 @@ li {
 }
 
 .img-width-940 img {
-  width: 940px;
+  max-width: 940px;
+  max-height: 850px;
 }
 
 img {
