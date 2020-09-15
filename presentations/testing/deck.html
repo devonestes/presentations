@@ -1,0 +1,88 @@
+---
+layout: presentation
+title: Comparing Concurrency Patterns in Elixir and Erlang
+permalink: /elixir_erlang_concurrency/
+---
+layout: true
+.watermark-left[@devoncestes]
+.watermark-middle[ElixirConf EU V 2020]
+
+---
+class: center, middle, headline
+
+# Testing in Elixir
+
+???
+* Because we don't have a whiteboard I'm writing this stuff down here
+
+---
+class: center, middle
+
+## Two classes of tests
+
+### Tests that call functions
+### Tests that simulate a user
+
+???
+* There are, broadly speaking, two classes of tests
+
+---
+class: center, middle
+
+## Tests that call functions
+
+???
+* Might be called a unit test or something like that, but in Elixir we just have functions and
+data, and you can't test data, so we test functions! Today we'll call these unit tests, with the
+"unit" being a function.
+
+---
+class: center, middle
+
+## Tests that simulate a user
+
+???
+* These might be called feature tests, or integration tests, or blackbox tests, or any number of
+names. For today we'll call them feature tests.
+* If you're lucky enough to have an API that just involves calling functions (like for a library),
+then you don't even really have this kind of test!
+
+---
+class: center, middle
+
+## Tests (generally) have two possible things to test
+
+### Return value
+### Side effects
+
+???
+* In general, these are the two things we're testing. This is a bit of a simplification, as "side
+effects" is a really, really broad category of things. But generally, when we write a test, we're
+doing doing one thing (calling a function or hitting an HTTP endpoint, or using a CLI command),
+and that action has a return value (or not!), and it has side effects (or not!).
+
+---
+class: center, middle
+
+## Always test them both!
+
+???
+* Whenever you write a test, you need to make assertions about the return value of the function or
+operation (if there is one), and then about the side effects of the function or operation (if
+there are any).
+* This is _super_ important!
+
+---
+class: center, middle
+
+## What is a side effect?
+
+### DB reads/writes
+### `send/1` or `receive`
+### anything async
+### filesystem
+### system or application environment
+
+???
+* Most of the stuff that makes an application worth using, basically. In general, we're
+programming to get side effects.
