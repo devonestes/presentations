@@ -86,3 +86,19 @@ class: center, middle
 ???
 * Most of the stuff that makes an application worth using, basically. In general, we're
 programming to get side effects.
+
+---
+class: center, middle
+
+## What about mocks/calling other functions as a side effect?
+
+???
+* Like all things, there are tradeoffs here. The tradeoff is coupling vs. simplicity of testing.
+* It's far easier to say "this function takes some parameters, creates a CSV and uploads it to S3"
+when describing the behavior of a function instead of saying "this function takes some parameters,
+calls the CSV.create/2 function, and then pipes that to the S3.upload_csv/3 function."
+* When you're using a function, you want to know what it does, and saying "it calls these other
+functions" isn't a really helpful description usually, and couples you to the implementation of
+those functions.
+* The first version is completely independent of the implementation - you can delete those other
+two functions and inline them, and the test is still valid.
