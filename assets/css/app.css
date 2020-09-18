@@ -184,7 +184,6 @@ li {
 .remark-code, .remark-inline-code {
   font-family: 'Ubuntu Mono';
   background-color: transparent !important;
-  /*background-color: rgb(250, 250, 250) !important;*/
 }
 
 .remark-code {
@@ -197,7 +196,6 @@ li {
 }
 
 .remark-slide-content {
-  background-image: url("../images/sketch_template.png") !important;
   background-attachment: fixed;
   background-size: contain;
   background-position: 0 0;
@@ -276,6 +274,10 @@ img {
 
 .cols {
   display: flex;
+}
+
+.twentyfive {
+  flex: 25%;
 }
 
 .fifty {
