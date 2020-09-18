@@ -1,7 +1,7 @@
 ---
 layout: presentation
 title: Comparing Concurrency Patterns in Elixir and Erlang
-permalink: /elixir_erlang_concurrency/
+permalink: /testing/
 ---
 layout: true
 .watermark-left[@devoncestes]
@@ -14,17 +14,201 @@ class: center, middle, headline
 
 ???
 * Because we don't have a whiteboard I'm writing this stuff down here
-
 ---
-class: center, middle
+class: middle, padding
 
-## Two classes of tests
+.center[
+# Two broad categories
+]
 
-### Tests that call functions
-### Tests that simulate a user
+.cols[
+.twentyfive[
+
+## &nbsp;
+
+]
+
+.fifty[
+
+## What?
+## &nbsp;
+
+]
+
+.fifty[
+## How?
+
+]
+
+.twentyfive[
+
+## &nbsp;
+
+]
+]
 
 ???
 * There are, broadly speaking, two classes of tests
+
+
+---
+class: middle, padding
+
+.center[
+# Two broad categories
+]
+
+.cols[
+.twentyfive[
+
+## &nbsp;
+
+]
+
+.fifty[
+
+## What?
+## A function
+
+]
+
+.fifty[
+## How?
+
+]
+
+.twentyfive[
+
+## &nbsp;
+
+]
+]
+
+???
+* There are, broadly speaking, two classes of tests
+---
+class: middle, padding
+
+.center[
+# Two broad categories
+]
+
+.cols[
+.twentyfive[
+
+## &nbsp;
+
+]
+
+.fifty[
+
+## What?
+## A function
+## A user-facing API
+
+]
+
+.fifty[
+
+## How?
+
+]
+
+.twentyfive[
+
+## &nbsp;
+
+]
+]
+
+???
+* There are, broadly speaking, two classes of tests
+
+
+
+---
+class: middle, padding
+
+.center[
+# Two broad categories
+]
+
+.cols[
+.twentyfive[
+
+## &nbsp;
+
+]
+
+.fifty[
+
+## What?
+## A function
+## A user-facing API
+
+]
+
+.fifty[
+
+## How?
+## Example based
+
+]
+
+.twentyfive[
+
+## &nbsp;
+
+]
+]
+
+???
+* There are, broadly speaking, two classes of tests
+
+
+
+
+---
+class: middle, padding
+
+.center[
+# Two broad categories
+]
+
+.cols[
+.twentyfive[
+
+## &nbsp;
+
+]
+
+.fifty[
+
+## What?
+## A function
+## A user-facing API
+
+]
+
+.fifty[
+
+## How?
+## Example based
+## Property based
+
+]
+
+.twentyfive[
+
+## &nbsp;
+
+]
+]
+
+???
+* There are, broadly speaking, two classes of tests
+
+
 
 ---
 class: center, middle
@@ -50,7 +234,7 @@ then you don't even really have this kind of test!
 ---
 class: center, middle
 
-## Tests (generally) have two possible things to test
+## Functions (generally) have two possible things to test
 
 ### Return value
 ### Side effects
@@ -104,3 +288,18 @@ those functions.
 two functions and inline them, and the test is still valid.
 * Both are valid, but I strongly prefer the latter, and for most cases you probably should, too,
 since it allows you to change implementations without needing to change your tests.
+
+---
+class: center, middle
+
+# The plan for today
+
+.left[
+
+### 1) Example based unit tests
+### 2) Example based feature tests
+### 3) Property based unit tests
+### 4) Property based API tests
+### 5*) Stateful property based unit tests
+
+]
