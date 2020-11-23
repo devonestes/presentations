@@ -1,0 +1,333 @@
+---
+layout: presentation
+title: Getting Started with Mutation Testing in Elixir using Muzak
+permalink: /mutation_testing/
+---
+layout: true
+.watermark-left[@devoncestes]
+.watermark-middle[Virtual BEAM Meetup]
+
+---
+class: center, middle, headline
+
+## Getting Started with Mutation Testing in Elixir using Muzak
+
+???
+
+Today we're going to talk about mutation testing, and I'll also give a quick introduction to a
+mutation testing tool for Elixir that I've written called Muzak.
+
+Many folks haven't heard of mutation testing before, though, so let's first give an introduction
+to that.
+
+---
+class: center, middle, headline
+
+## What is mutation testing?
+
+???
+
+In short, mutation testing is the process of systematically introducing bugs into your code and
+then running your tests to see if that bug is caught by a failing test or some other error, like a
+compilation error.
+
+What does that look like? Well, let's look at some examples!
+
+---
+class: padding
+
+```
+defmodule CoverExample do
+  def write_json_to_file(map, path) do
+    json = Jason.encode!(map)
+    File.write(json, path)
+    json
+  end
+end
+```
+
+???
+
+Here's a function that takes a map, converts it to JSON and writes it to a file.
+Pretty simple, right?!
+
+--
+
+```
+defmodule CoverExampleTest do
+  use ExUnit.Case
+
+  describe "write_json_to_file/2" do
+    @tag :tmp_dir
+    test "gives us the correct JSON", context do
+      map = %{"test" => "map"}
+      assert CoverExample.write_json_to_file(map, context.tmp_dir) == Jason.encode!(map)
+    end
+  end
+end
+```
+
+???
+
+And we even have a test for that function, and it passes! Of course we only have 3 lines of code
+here, so we have 100% test coverage according to `cover`. But can we break this code without
+causing a failing test?!
+
+---
+class: padding
+
+```
+defmodule CoverExample do
+  def write_json_to_file(map, path) do
+    json = Jason.encode!(map)
+    # File.write(json, path)
+    json
+  end
+end
+```
+
+```
+defmodule CoverExampleTest do
+  use ExUnit.Case
+
+  describe "write_json_to_file/2" do
+    @tag :tmp_dir
+    test "gives us the correct JSON", context do
+      map = %{"test" => "map"}
+      assert CoverExample.write_json_to_file(map, context.tmp_dir) == Jason.encode!(map)
+    end
+  end
+end
+```
+
+???
+
+We sure can! As we see in the test, we're not testing the side effect of writing to the file. If
+we were to really break that code, we would see that we still have our passing test and we still
+have 100% code coverage according to `cover`.
+
+And you want to know something else? Did anybody notice anything funny about that first version of
+the code?
+
+---
+class: padding
+
+```
+defmodule CoverExample do
+  def write_json_to_file(map, path) do
+    json = Jason.encode!(map)
+    `File.write(json, path)`
+    json
+  end
+end
+```
+
+```
+defmodule CoverExampleTest do
+  use ExUnit.Case
+
+  describe "write_json_to_file/2" do
+    @tag :tmp_dir
+    test "gives us the correct JSON", context do
+      map = %{"test" => "map"}
+      assert CoverExample.write_json_to_file(map, context.tmp_dir) == Jason.encode!(map)
+    end
+  end
+end
+```
+
+???
+
+Maybe with this line?
+
+That's right - even the first version of this code that we _thought_ was correct probably wasn't
+doing what we wanted it to do because the arguments to `File.write/2` are flipped!
+
+---
+class: center, middle
+
+# Mutation Testing tests your tests!
+#### &nbsp;
+# &nbsp;
+# &nbsp;
+# &nbsp;
+
+---
+class: center, middle
+
+# Mutation Testing tests your tests!
+#### &nbsp;
+# Missing tests
+# &nbsp;
+# &nbsp;
+
+???
+So this is one of the major benefits - probably _the_ major benefit for most people - that
+Mutation Testing offers us - it shows us what behavior is untested by systematically breaking our
+applications and then seeing what's caught by our tests.
+
+---
+class: center, middle
+
+# Mutation Testing tests your tests!
+#### &nbsp;
+# Missing tests
+# Duplicate tests
+# &nbsp;
+
+???
+
+But that's not all! As it executes, we can keep track of which tests pass and which tests fail,
+and then do a little bit of math and statistics to tell us which tests always fail together. This
+would possible indicate that two tests are essentially duplicates, meaning that you might be able
+to delete one of them!
+
+---
+class: center, middle
+
+# Mutation Testing tests your tests!
+#### &nbsp;
+# Missing tests
+# Duplicate tests
+# Invalid tests
+
+???
+
+And it can also tell us if there are tests that _never_ fail! I know I've encountered a couple
+tests that, due to some heavy use of mocks, weren't actually testing anything in the
+implementation. I could literally delete the entire implementation of the code that was supposedly
+under test and the tests would still pass. Mutation testing can find these for us.
+
+---
+class: padding
+
+```
+defmodule CoverExample do
+  def write_json_to_file(map, path) do
+    json = Jason.encode!(map)
+    `File.write(json, path)`
+    json
+  end
+end
+```
+
+```
+defmodule CoverExampleTest do
+  use ExUnit.Case
+
+  describe "write_json_to_file/2" do
+    @tag :tmp_dir
+    test "gives us the correct JSON", context do
+      map = %{"test" => "map"}
+      assert CoverExample.write_json_to_file(map, context.tmp_dir) == Jason.encode!(map)
+    end
+  end
+end
+```
+
+???
+
+Let's go back to this code for a second, though. What if this code has been running in production
+for a while, and it's not causing any problems? Maybe this means that the writing of that JSON to
+a file isn't really needed? Maybe we can _delete_ some of this code!
+
+This is another thing that Mutation Testing can help us with. Sometimes it's the **tests** that
+are correct and not the code, meaning that we can delete some unneeded code!
+
+---
+class: center, middle
+
+# Coverage based on **logic**, not **lines**
+
+???
+
+But this is the big thing that most people are going to want. It's a measure of code coverage
+based on what really matters in our applications - its logic.
+
+Why is measuring code coverage based on lines not enough? Well, we've already seen one example
+where we had 100% coverage based on LOC, but there's another common way in which that measurement
+doesn't find everything for us. Let's look at another example.
+
+---
+class: padding, middle
+
+```
+defmodule Authorization do
+  def user_can_modify?(user, resource) do
+    user.role in [:admin, :owner] or user.id in resource.member_ids
+  end
+end
+```
+
+???
+
+This is a situation where we have three possible branches in the logic, but all three of them are
+on the same line. Coverage based on LOC will show us as 100% covered if we test any one of those -
+or as we saw before, if we just hit that line and don't actually test anything! Mutation testing
+will show us specifically if we're testing this logic.
+
+I don't think we want to live in a world where we need to have exactly one possible branch in the
+logic on each line of code just to make our tools work well for us!
+
+---
+class: center, middle, headline
+
+# Problems?
+
+???
+
+So I've spoken a lot about what Mutation Testing can offer us, and if it were all rainbows and
+sunshine then it would be a no-brainer that everyone should use it all the time, right?!
+
+Well, the big problem that we when we want to use mutation testing is how _long_ it takes to run!
+
+---
+class: center, middle, headline
+
+# 🏃‍♀️Runtime🏃🏿‍♂️
+
+???
+
+Which, when you think about it, makes sense, right? We need to generate what is often thousands or
+tens of thousands of possible mutations in an application, and then potentially run our entire
+test suite for each of them. That's thousands of test suite runs, and that can really add up!
+
+---
+class: center, middle
+
+# Filtering and ordering what what mutated
+# &nbsp;
+
+???
+
+Basically you have two options to reduce the runtime - you can filter what gets mutated,
+
+---
+class: center, middle
+
+# Filtering and ordering what what mutated
+# Filtering and ordering your tests
+
+???
+
+And you can filter which tests are run.
+
+Luckily these are thing that can make a huge difference, and in basically any mutation testing
+library some version of this needs to be implemented, otherwise mutation testing is generally
+unusble because it can take literally _days_ to run otherwise.
+
+---
+class: center, middle, headline
+
+## Muzak & Muzak Pro
+
+???
+
+This brings me to the real fun part here today - I've written such a mutation testing library that
+I've called Muzak, and I wanted to show a bit of it to y'all!
+
+So Muzak is on Hex now, and it should give you a basic introduction to mutation testing if you
+wanted to try it out on one of your projects. Muzak Pro, however, is mutation testing designed for
+teams, and for use in things like your CI pipeline. It is a paid product, though, as this is a
+_ton_ of work to do and in general I'm more comfortable with selling something than I am with
+asking for sponsorship or donations, and so that's why I went this route.
