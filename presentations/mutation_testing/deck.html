@@ -331,3 +331,34 @@ wanted to try it out on one of your projects. Muzak Pro, however, is mutation te
 teams, and for use in things like your CI pipeline. It is a paid product, though, as this is a
 _ton_ of work to do and in general I'm more comfortable with selling something than I am with
 asking for sponsorship or donations, and so that's why I went this route.
+
+---
+class: center, middle
+
+![Pareto principle](/assets/images/pareto_principle.png)
+
+???
+
+So mutation testing is very much an optimization! Code coverage metrics based on lines of code are
+basically free for us to track in terms of effort and complexity. That's why everybody does it -
+it doesn't really have a noticable cost.
+
+Mutation testing, however, has a fairly noticable cost, and that cost is runtime, and that's what
+makes many folks apprehensive about adopting mutation testing.
+
+The thing is, though, you might already be paying that cost!
+
+---
+class: center, middle, headline
+
+# 🖥️ > 👩🏼‍💻 
+
+???
+
+Right now, the job of looking at some code and deciding if we've covered all the possible test
+cases falls to humans to do. Either you, as the person writing the code, or someone reviewing your
+code, needs to look and determine if everything is in order. This is itself a time-consuming
+process, and will miss _far_ more things than mutation testing would miss!
+
+If there's something a computer can do really well for you, it's probably a better idea to let the
+computer do it instead of having a human do it.
