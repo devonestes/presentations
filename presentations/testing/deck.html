@@ -69,41 +69,6 @@ class: middle, padding
 
 ## What?
 ## A function
-
-]
-
-.fifty[
-## How?
-
-]
-
-.twentyfive[
-
-## &nbsp;
-
-]
-]
-
-???
-* There are, broadly speaking, two classes of tests
----
-class: middle, padding
-
-.center[
-# Two broad categories
-]
-
-.cols[
-.twentyfive[
-
-## &nbsp;
-
-]
-
-.fifty[
-
-## What?
-## A function
 ## A user-facing API
 
 ]
@@ -111,6 +76,8 @@ class: middle, padding
 .fifty[
 
 ## How?
+## Example based
+## Property based
 
 ]
 
@@ -288,6 +255,15 @@ those functions.
 two functions and inline them, and the test is still valid.
 * Both are valid, but I strongly prefer the latter, and for most cases you probably should, too,
 since it allows you to change implementations without needing to change your tests.
+
+---
+class: center, middle
+
+|                                        | Example based      | Property based  |
+|----------------------------------------|--------------------|-----------------|
+| <h5>Function (unit)</h5>               |  ✔️                 |     ✔️           |
+| <h5>User-facing API (feature)</h5>     |  ✔️                 |     ✔️           |
+
 
 ---
 class: center, middle
