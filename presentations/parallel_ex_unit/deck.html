@@ -1,0 +1,78 @@
+---
+layout: presentation
+title: Going Multi-Node with ExUnit
+permalink: /parallel_ex_unit/
+---
+layout: true
+.watermark-left[@devoncestes]
+.watermark-middle[ElixirConf EU 2021]
+
+---
+class: center, middle, headline
+
+## Going Multi-Node
+### with ExUnit
+
+???
+* This talk is one of my favorite kinds of talks.
+
+---
+class: center, middle
+
+![](/assets/images/pattern_language.png)
+## Picture of four quadrents - cool/boring useful/useless
+
+???
+* It's cool & useless
+
+---
+class: center, middle
+
+First we need to learn how ExUnit works
+
+???
+
+---
+class: center, middle
+
+We async compile all the test .exs files
+
+???
+
+* 
+
+---
+class: center, middle
+
+Once we do that, we start pulling any test modules that are async: true
+
+???
+
+*
+
+---
+class: center, middle
+
+Once all modules are loaded and all async tests have finished, we run the sync tests.
+
+But for today, we don't really care about those (and you shouldn't either, cause you shouldn't
+have more than a couple of them).
+
+???
+
+* 
+
+---
+class: center, middle
+
+So, we're running these async tests - great! What if we want to do this distributed?
+
+???
+
+
+---
+class: center, middle
+
+Node.spawn/2 - thank you for coming to my TED talk!
+
+Just kidding. It's more than that!
