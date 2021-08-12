@@ -65,7 +65,8 @@ have more than a couple of them).
 ---
 class: center, middle
 
-So, we're running these async tests - great! What if we want to do this distributed?
+So, we're running these async tests - great! What if we want to distribute this work across a
+bunch of machines?
 
 ???
 
@@ -73,6 +74,76 @@ So, we're running these async tests - great! What if we want to do this distribu
 ---
 class: center, middle
 
-Node.spawn/2 - thank you for coming to my TED talk!
+Well, we use `Node.spawn/2`. That's it - thank you for coming to my TED talk!
 
 Just kidding. It's more than that!
+
+---
+class: center, middle
+
+While that is an option, it's a bit more complicated than that. Well, not just a bit, but kind of
+a lot more complicated.
+
+---
+class: center, middle
+
+Of course we need an example, and here's the example we're going to use for today.
+
+for letter <- ?A..?Z do
+  defmodule String.to_atom("Elixir.Example.Test.#{[letter]}") do
+    use ExUnit.Case, async: true
+
+    test "calculates the fibonacci numbers" do
+      for num <- 1..35 do
+        assert fib(num) > 0
+      end
+    end
+
+    defp fib(0) do 0 end
+    defp fib(1) do 1 end
+    defp fib(n) do fib(n-1) + fib(n-2) end
+  end
+end
+
+---
+class: center, middle
+
+So on my machine, if I run these in series I see this:
+
+mix test test/device_tracker/example_test.exs
+..........................
+
+Finished in 19.1 seconds (0.00s async, 19.1s sync)
+26 tests, 0 failures
+
+---
+class: center, middle
+
+And if I run them in parallel I see this:
+
+mix test test/device_tracker/example_test.exs
+..........................
+
+Finished in 7.2 seconds (7.2s async, 0.00s sync)
+26 tests, 0 failures
+
+---
+class: center, middle
+
+Not a bad increase, but I think we can do better. For today I'm going to skip the process of
+actually setting up a cluster, and we're just going to hide that behind a function that's called
+`join_cluster/0`.
+
+---
+class: center, middle
+
+Now we're going to assume that when I list the nodes in the cluster, I get 4 nodes (including my
+local machine). How can I get a few other CPU cores to help us chip away at these tests?! At the
+moment this is impossible with ExUnit, and for good reasons which we'll see a bit later on. But
+let's make it happen anyway, shall we?
+
+---
+class: center, middle
+
+The first thing we're going to do is Monkey Patch ExUnit 😀
+I bet you didn't know that was something you could do, right?! But it is!
