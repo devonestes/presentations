@@ -24,6 +24,9 @@ class: center, middle
 
 ???
 * It's cool & useless
+* I love having useless trivia knowledge!
+* But every now and then, that useless knowledge can be extremely useful. It's rare, but it
+happens.
 
 ---
 class: center, middle
@@ -76,18 +79,20 @@ class: center, middle
 
 Well, we use `Node.spawn/2`. That's it - thank you for coming to my TED talk!
 
-Just kidding. It's more than that!
-
 ---
 class: center, middle
 
-While that is an option, it's a bit more complicated than that. Well, not just a bit, but kind of
-a lot more complicated.
+Just kidding - that doesn't work at all. It's _WAY_ more complicated than that!
+And that's the fun stuff we'll be looking at today. We'll be moving a bit quick,
+but if there's anything you want further information about you can always ask in
+the Q&A after or find me in the hallway and we can chat more.
 
 ---
 class: center, middle
 
 Of course we need an example, and here's the example we're going to use for today.
+
+# test/my_test.exs
 
 for letter <- ?A..?Z do
   defmodule String.to_atom("Elixir.Example.Test.#{[letter]}") do
@@ -130,20 +135,244 @@ Finished in 7.2 seconds (7.2s async, 0.00s sync)
 ---
 class: center, middle
 
-Not a bad increase, but I think we can do better. For today I'm going to skip the process of
-actually setting up a cluster, and we're just going to hide that behind a function that's called
-`join_cluster/0`.
-
----
-class: center, middle
-
-Now we're going to assume that when I list the nodes in the cluster, I get 4 nodes (including my
-local machine). How can I get a few other CPU cores to help us chip away at these tests?! At the
-moment this is impossible with ExUnit, and for good reasons which we'll see a bit later on. But
-let's make it happen anyway, shall we?
+Not a bad increase, but I think we can do better. So, let's first try the naive way of doing this
+- hacking around ExUnit and seeing what happens!
 
 ---
 class: center, middle
 
 The first thing we're going to do is Monkey Patch ExUnit 😀
 I bet you didn't know that was something you could do, right?! But it is!
+
+---
+class: center, middle
+
+How many times have you seen this message:
+
+warning: redefining module ExUnit (current version loaded from /home/devon/.asdf/installs/elixir/1.12.2-otp-23/bin/../lib/ex_unit/ebin/Elixir.ExUnit.beam)
+  test/test_helper.exs:79
+
+---
+class: center, middle
+
+What that message is saying is "Hey! You had already given me a module with that name to load into
+the code server, but now you're giving me a new one!"
+
+---
+class: center, middle
+
+And how does Elixir know that we're redefining a module when we do that? Well, we can thank the
+BEAM code server for that!
+
+---
+class: center, middle
+
+So, before we go any further, we need to learn a bit about the code server and how it works.
+
+---
+class: center, middle
+
+You can think of the code server as a big key-value store, where keys are function names and
+values are bytecode for functions. This part of the code server is called the `global export
+table`.
+
+---
+class: center, middle
+
+Each function in our application has a name. This name is usually the MFA (module, function &
+arity), but even private and anonymous functions actually have names in the BEAM code server.
+
+fun = fn -> :ok end
+#Function<45.40011524/0 in :erl_eval.expr/5>
+
+---
+class: center, middle
+
+For the most part (of course there are exceptions), the code server deals with modules. You can
+load or unload a module from the code server, and the code server actually keeps _two_ versions of
+a module around if you load a new one! This is how hot code loading works, by the way, and the
+whole "keeping the current and previous version around" thing is so you can roll back if there's a
+problem.
+
+---
+class: center, middle
+
+And in reality, the .beam files that Elixir (and other BEAM languages) emit are really just
+instructions about how to populate this code server! That's why we get one .beam file for each
+module.
+
+---
+class: center, middle
+
+So, we've got .beam files, and these .beam files populate the code server, and the code server
+holds instructions for functions.
+
+---
+class: center, middle
+
+It's also _really_ important to note that every BEAM node gets its _OWN_ code server. You can't
+share them across nodes. You _CAN_ however share .beam files across nodes.
+
+---
+class: center, middle
+
+When you boot a node, you can give it a path to a directory where .beam files are stored - this is
+called (plainly enough) the `code path`. This `code path` can even be changed at runtime if you're
+in interactive mode (there are two modes for a BEAM node).
+
+---
+class: center, middle
+
+So this code server is really, really important, and especially important to the task we're
+undertaking today of trying to get ExUnit to run on multiple nodes.
+
+---
+class: center, middle
+
+Another thing to mention - Elixir also has its own code server! But that's really just used for
+compilation, and so we're not going to cover that today. We'll be covering some stuff that's
+private in Elixir & ExUnit, but the Elixir code server is super duper private, and so I just
+wanted to make sure folks knew this existed so there's no confusion.
+
+---
+class: center, middle
+
+Ok, so now that we've got a bit of that learning about how ExUnit works, and how the code server
+works, let's get back to the task at hand!
+
+---
+class: center, middle
+
+So, here's the plan - since the unit of parallelism in ExUnit is the module, not the test, we're
+going to try distributing this work by modules and not by individual tests. This means that module
+A runs on machine 1, module B runs on machine 2, etc.
+
+---
+class: center, middle
+
+But, of course, this is tricky! The first problem we have is - how do we load Example.Test.A on
+the node that we need?
+
+---
+class: center, middle
+
+Another cool thing about ExUnit - it has its own compiler! Our test modules are defined in .exs
+files, and that means they're not compiled by the standard Elixir compiler. When we run `mix
+test`, it compiles and loads all our test files (based on the `_test.exs` suffix) into the code
+server for the BEAM node that we've just started. It does a bunch of other stuff, too, but what we
+care about right now is that part, since if we don't load the module into the code server, it
+won't be found when we try and run the tests.
+
+---
+class: center, middle
+
+So, if we want to distribute this work, we've gotta load these modules into the code servers on
+these other nodes. Now, normally if you want to load code into a code server, you can do that by
+sharing the code path (remember, we can set that at runtime!), but for these .exs files, we don't
+actually write .beam files to disk, so that won't work.
+
+---
+class: center, middle
+
+The other normal way you can load code into a code server is by giving the code server the info it
+would normally find in the .beam file via a function call to `:code.load_binary/3`. This works
+well for sure, but there's kind of another hitch.
+
+---
+class: center, middle
+
+Normally when you do this, you would get the info for the code you want to load with
+`:code.get_object_code/1`. But that doesn't actually pull the code from the code server - it pulls
+it from the .beam files - and since we don't have .beam files for these test modules,
+:code.get_object_code/1 errors!
+
+---
+class: center, middle
+
+So, we've gotta make another change to how ExUnit works. Basically, we need to modify the ExUnit
+compiler to look like this so we load all the test modules on all nodes.
+
+We change this:
+
+case Kernel.ParallelCompiler.require(test_files, parallel_require_callbacks) do
+  {:ok, _, _} -> :ok
+  {:error, _, _} -> exit({:shutdown, 1})
+end
+
+To this:
+
+{results, _} = :rpc.multicall(Kernel.ParallelCompiler, :require, [test_files, parallel_require_callbacks])
+
+Enum.each(results, fn
+  {:ok, _, _} -> :ok
+  {:error, _, _} -> exit({:shutdown, 1})
+end)
+
+---
+class: center, middle
+
+Also funny to note - trying to compile Elixir files synchronously is actually surprisingly
+difficult, so we're just not going to do that today :smile:.
+
+---
+class: center, middle
+
+Ok, so difficult task #1 is taken care of - the test modules are loaded on all of the nodes on our
+cluster!
+
+Now we can get back to that simple idea that when you have concurrency, you get distribution for
+free. So, when ExUnit spawns a process to run our test module, we just need that process to be
+spawned on a different node sometimes.
+
+---
+class: center, middle
+
+So in the ExUnit Runner, we change this:
+
+{test_module, invalid_tests, finished_tests} = run_module(config, test_module, to_run_tests)
+
+to this:
+
+{test_module, invalid_tests, finished_tests} = :rpc.call(node, __MODULE__, :run_module, [config, test_module, to_run_tests])
+
+And we need to make that `run_module` function public so we can use it this way.
+
+---
+class: center, middle
+
+Now we've got distribution working! And if we want to make it a bit faster, we can do this:
+
+key = :rpc.async_call(node, __MODULE__, :run_module, [config, test_module, to_run_tests])
+{:value, {test_module, invalid_tests, finished_tests}} = :rpc.nb_yield(key, :infinity)
+
+---
+class: center, middle
+
+That :rpc module is really helpful if you're doing anything distributed! It's worth checking out.
+
+---
+class: center, middle
+
+Now I should caveat that there are some other changes that one would need to do to make this work,
+but those aren't particularly interesting and we don't learn much from them, so I'm not going to
+actually cover them today.
+
+---
+class: center, middle
+
+So, you might be thinking to yourself right now "but Devon, this all seems really useful! We could
+set up super-fast CI servers with a couple raspberry PIs that can run a long test suite super
+quick!
+
+---
+class: center, middle
+
+Yeah, if your application is dead simple, that can work. But most applications really aren't
+designed to be run as part of a cluster. If yours is, then great! But it's a non-trivial amount of
+work to make that happen, and the errors are really annoying and difficult to debug.
+
+---
+class: center, middle
+
+But, in our journey today we got to learn a bit about how ExUnit works and how the BEAM's code
+server works. I think this is really fun stuff to know about, and I hope you agree!
