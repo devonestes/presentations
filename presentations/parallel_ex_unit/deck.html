@@ -446,7 +446,7 @@ class: padding
 ]
 
 ```
-$ mix test test/device_tracker/example_test.exs
+$ mix test test/example_test.exs
 ..........................
 
 Finished in 19.1 seconds (0.00s async, 19.1s sync)
@@ -465,7 +465,7 @@ class: padding
 ]
 
 ```
-$ mix test test/device_tracker/example_test.exs
+$ mix test test/example_test.exs
 ..........................
 
 Finished in 7.2 seconds (7.2s async, 0.00s sync)
@@ -861,6 +861,27 @@ ExUnit's runner is a simplification, but the real change that we need to make is
 complicated.
 
 ---
+class: padding, middle
+
+```
+{test_module, invalid_tests, finished_tests} = run_module(config, test_module, to_run_tests)
+
+
+# becomes
+
+
+{test_module, invalid_tests, finished_tests} =
+  :rpc.call(node, __MODULE__, :run_module, [config, test_module, to_run_tests])
+```
+
+???
+
+* Not so bad, right?!
+* There were a few other changes I made to this to make it work in my example, which is on GitHub
+if you want to look through it and try it for yourself in a way that will show you the benefit
+even if you just have a single machine (as long as it has at least 4 cores).
+
+---
 class: padding
 
 .center[
@@ -868,7 +889,7 @@ class: padding
 ]
 
 ```
-$ mix test test/device_tracker/example_test.exs
+$ mix test test/example_test.exs
 ..........................
 
 Finished in 19.1 seconds (0.00s async, 19.1s sync)
@@ -887,7 +908,7 @@ class: padding
 ]
 
 ```
-$ mix test test/device_tracker/example_test.exs
+$ mix test test/example_test.exs
 ..........................
 
 Finished in 7.2 seconds (7.2s async, 0.00s sync)
@@ -906,7 +927,7 @@ class: padding
 ]
 
 ```
-$ mix test test/device_tracker/example_test.exs
+$ mix test test/example_test.exs
 ..........................
 
 Finished in 3.7 seconds (3.7s async, 0.00s sync)
@@ -920,24 +941,6 @@ Finished in 3.7 seconds (3.7s async, 0.00s sync)
 * 48% faster than parallel
 * Given 26 cores and a bit of optimization, you could get this down to the time it take to
 basically just run a single test, so probably around 1 second.
-
----
-class: padding, middle
-
-```
-{test_module, invalid_tests, finished_tests} = run_module(config, test_module, to_run_tests)
-
-
-# becomes
-
-
-{test_module, invalid_tests, finished_tests} =
-  :rpc.call(node, __MODULE__, :run_module, [config, test_module, to_run_tests])
-```
-
-???
-
-* Not so bad, right?!
 
 ---
 class: center, middle
