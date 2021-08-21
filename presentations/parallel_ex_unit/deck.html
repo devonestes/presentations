@@ -657,7 +657,7 @@ def loop(:async) do
   case wait_for_module(:async) do
     {:ok, mod} ->
       `node = Enum.random([Node.self() | Node.list()])`
-      spawn(fn -> run_module(mod))
+      spawn(fn -> run_module(mod) end)
       loop(:async)
 
     {:error, :no_more_async_modules} ->
@@ -670,6 +670,9 @@ end
 
 * First, let's get a node on which we can run this. For now we'll just do a random node from all
 nodes in the cluster.
+* And an extra special note for those of you playing along at home - in this specific case
+`Enum.random` will actually always give us the same node and not a random one - but for now we're
+going to pretend like it would so we can move faster!
 
 ---
 class: middle, padding
@@ -679,7 +682,7 @@ def loop(:async) do
   case wait_for_module(:async) do
     {:ok, mod} ->
       node = Enum.random([Node.self() | Node.list()])
-      `Node.spawn(node, fn -> run_module(mod))`
+      `Node.spawn(node, fn -> run_module(mod) end)`
       loop(:async)
 
     {:error, :no_more_async_modules} ->
@@ -694,131 +697,284 @@ end
 shorthand for this.
 
 ---
-class: center, middle
+class: middle, padding
 
-But, of course, this is tricky! The first problem we have is - how do we load Example.Test.A on
-the node that we need?
+```
+# test/test_helper.exs
 
----
-class: center, middle
+defmodule ExUnit.Runner do
+  # our new implementation
+end
 
-Another cool thing about ExUnit - it has its own compiler! Our test modules are defined in .exs
-files, and that means they're not compiled by the standard Elixir compiler. When we run `mix
-test`, it compiles and loads all our test files (based on the `_test.exs` suffix) into the code
-server for the BEAM node that we've just started. It does a bunch of other stuff, too, but what we
-care about right now is that part, since if we don't load the module into the code server, it
-won't be found when we try and run the tests.
+ExUnit.start()
+```
 
----
-class: center, middle
+???
 
-So, if we want to distribute this work, we've gotta load these modules into the code servers on
-these other nodes. Now, normally if you want to load code into a code server, you can do that by
-sharing the code path (remember, we can set that at runtime!), but for these .exs files, we don't
-actually write .beam files to disk, so that won't work.
+And this is how we actually do our monkey patching! We re-define the module in our
+`test_helper.exs` file, because that's loaded after we start our VM for the first time.
+
+We need to remember that we're copying & pasting the WHOLE MODULE, and then making the changes
+that we want to make.
 
 ---
 class: center, middle
 
-The other normal way you can load code into a code server is by giving the code server the info it
-would normally find in the .beam file via a function call to `:code.load_binary/3`. This works
+# 😞
+
+???
+
+* But sadly, this doesn't work...
+* Why not? Well, remember that code server we spoke about just a few minutes ago???
+
+---
+class: padding, middle
+
+```
+1) Example.Test.A: failure on setup_all callback, all tests have been invalidated
+     ** (UndefinedFunctionError) function Example.Test.A.__ex_unit__/2 is undefined or private.
+     Did you mean one of:
+
+           * __ex_unit__/0
+           * __ex_unit__/2
+
+     stacktrace:
+       Example.Test.A.__ex_unit__(:setup_all, %{case: Example.Test.A, module: Example.Test.A})
+```
+
+???
+
+* You'll actually get a spectacularly confusing error here!
+* Usually this sort of thing in Elixir is considered a bug, but since we're _WAY_ off the beaten
+path here and doing a lot of things we shouldn't be doing, I don't blame them for this.
+* But I'll help you cut to the chase here - this is happening because of the two different code
+servers!
+
+---
+class: center, middle
+
+# Need picture
+
+???
+
+* Another cool thing about ExUnit - it has its own compiler!
+* Our test modules are defined in .exs files, and that means they're not compiled by the standard
+Elixir compiler.
+* When we run `mix test`, it compiles and loads all our test files (based on the `_test.exs`
+suffix) into the code server for the BEAM node that we've just started.
+* It does a bunch of other stuff, too!
+* So, we need to make sure that when we compile our actual test modules, that those get loaded
+onto all the code servers in our cluster.
+
+---
+class: padding, middle
+
+```
+1) Example.Test.A: failure on setup_all callback, all tests have been invalidated
+     ** (UndefinedFunctionError) function Example.Test.A.__ex_unit__/2 is undefined or private.
+     Did you mean one of:
+
+           * __ex_unit__/0
+           * __ex_unit__/2
+
+     stacktrace:
+       Example.Test.A.__ex_unit__(:setup_all, %{case: Example.Test.A, module: Example.Test.A})
+```
+
+???
+
+* So this specific error makes a bit more sense, right? When the error occured on Node 2, the
+error was that the function was undefined or private. Basically, a function with that name wasn't
+in the code server.
+* But then when ExUnit formatted that error for us, it did that formatting on the main node which
+_DID_ have that function in the code server, and it uses this information for the "Did you mean"
+recommendation there.
+* So, if we want to distribute this work, we've gotta load these modules into the code servers on
+these other nodes.
+
+---
+class: middle, padding
+
+```
+path = :code.get_path()
+:rpc.multicall(Node.list(), :code, :set_path, [path])
+
+# or
+
+{module, binary, filename} = :code.get_object_code(Example.Test.A)
+:rpc.multicall(Node.list(), :code, :load_binary, [module, filename, binary])
+```
+
+???
+
+* Now, normally if you want to load code into a code server, you can do that by
+sharing the code path (remember, we can set that at runtime!).
+* But for these .exs files, we don't actually write .beam files to disk, so that won't work!
+* The other normal way you can load code into a code server is by giving the code server the info
+it would normally find in the .beam file via a function call to `:code.load_binary/3`. This works
 well for sure, but there's kind of another hitch.
-
----
-class: center, middle
-
-Normally when you do this, you would get the info for the code you want to load with
+* Normally when you do this, you would get the info for the code you want to load with
 `:code.get_object_code/1`. But that doesn't actually pull the code from the code server - it pulls
 it from the .beam files - and since we don't have .beam files for these test modules,
 :code.get_object_code/1 errors!
-
----
-class: center, middle
-
-So, we've gotta make another change to how ExUnit works. Basically, we need to modify the ExUnit
+* So, we've gotta make another change to how ExUnit works. Basically, we need to modify the ExUnit
 compiler to look like this so we load all the test modules on all nodes.
 
-We change this:
+---
+class: padding, middle
 
+```
 case Kernel.ParallelCompiler.require(test_files, parallel_require_callbacks) do
   {:ok, _, _} -> :ok
   {:error, _, _} -> exit({:shutdown, 1})
 end
 
-To this:
 
-{results, _} = :rpc.multicall(Kernel.ParallelCompiler, :require, [test_files, parallel_require_callbacks])
+# becomes
+
+
+args = [test_files, parallel_require_callbacks]
+{results, _} = :rpc.multicall(Kernel.ParallelCompiler, :require, args)
 
 Enum.each(results, fn
   {:ok, _, _} -> :ok
   {:error, _, _} -> exit({:shutdown, 1})
 end)
+```
+
+???
+
+* With this change we'll now compile and load all the test files on all nodes instead of just the
+one that was started when you ran `mix test`.
+* Also funny to note - trying to compile Elixir files synchronously is actually surprisingly
+difficult, so we're just not going to do that today.
 
 ---
 class: center, middle
 
-Also funny to note - trying to compile Elixir files synchronously is actually surprisingly
-difficult, so we're just not going to do that today :smile:.
+# 🎉
+
+???
+
+* And, woah - now it works! Kind of. Again, the simple version of this process I showed for
+ExUnit's runner is a simplification, but the real change that we need to make isn't much more
+complicated.
 
 ---
-class: center, middle
+class: padding
 
-Ok, so difficult task #1 is taken care of - the test modules are loaded on all of the nodes on our
-cluster!
+.center[
+# In Series
+]
 
-Now we can get back to that simple idea that when you have concurrency, you get distribution for
-free. So, when ExUnit spawns a process to run our test module, we just need that process to be
-spawned on a different node sometimes.
+```
+$ mix test test/device_tracker/example_test.exs
+..........................
+
+Finished in 19.1 seconds (0.00s async, 19.1s sync)
+26 tests, 0 failures
+```
+
+???
+
+* If I run these tests on a slow computer I happened to have lying around, I see this
 
 ---
-class: center, middle
+class: padding
 
-So in the ExUnit Runner, we change this:
+.center[
+# In Parallel
+]
 
+```
+$ mix test test/device_tracker/example_test.exs
+..........................
+
+Finished in 7.2 seconds (7.2s async, 0.00s sync)
+26 tests, 0 failures
+```
+
+???
+* And I see this if I run them in parallel - 62% faster! This is nice, but we can do better.
+* These are our starting benchmarks here that we're going to try and improve upon.
+
+---
+class: padding
+
+.center[
+# Distributed
+]
+
+```
+$ mix test test/device_tracker/example_test.exs
+..........................
+
+Finished in 3.7 seconds (3.7s async, 0.00s sync)
+26 tests, 0 failures
+```
+
+???
+
+* This was with me adding an extra 2 nodes, one with 2 cores and one with 4 cores
+* 80% faster than in series
+* 48% faster than parallel
+* Given 26 cores and a bit of optimization, you could get this down to the time it take to
+basically just run a single test, so probably around 1 second.
+
+---
+class: padding, middle
+
+```
 {test_module, invalid_tests, finished_tests} = run_module(config, test_module, to_run_tests)
 
-to this:
 
-{test_module, invalid_tests, finished_tests} = :rpc.call(node, __MODULE__, :run_module, [config, test_module, to_run_tests])
+# becomes
 
-And we need to make that `run_module` function public so we can use it this way.
 
----
-class: center, middle
+{test_module, invalid_tests, finished_tests} =
+  :rpc.call(node, __MODULE__, :run_module, [config, test_module, to_run_tests])
+```
 
-Now we've got distribution working! And if we want to make it a bit faster, we can do this:
+???
 
-key = :rpc.async_call(node, __MODULE__, :run_module, [config, test_module, to_run_tests])
-{:value, {test_module, invalid_tests, finished_tests}} = :rpc.nb_yield(key, :infinity)
+* Not so bad, right?!
 
 ---
 class: center, middle
 
-That :rpc module is really helpful if you're doing anything distributed! It's worth checking out.
+# :code
+# :rpc
+
+???
+
+* Erlang gives us the really important stuff we need to make this work, so I'd really recommend
+looking into some of the stuff in these modules. While it's not as easy as drawing the rest of the
+owl, it really isn't that difficult to get the basics up and working.
 
 ---
 class: center, middle
 
-Now I should caveat that there are some other changes that one would need to do to make this work,
-but those aren't particularly interesting and we don't learn much from them, so I'm not going to
-actually cover them today.
+![](/assets/images/useful_cool_8.jpg)
 
----
-class: center, middle
+???
 
-So, you might be thinking to yourself right now "but Devon, this all seems really useful! We could
+* So, you might be thinking to yourself right now "but Devon, this all seems really useful! We could
 set up super-fast CI servers with a couple raspberry PIs that can run a long test suite super
 quick!
-
----
-class: center, middle
-
-Yeah, if your application is dead simple, that can work. But most applications really aren't
+* Yeah, if your application is dead simple, that can work. But most applications really aren't
 designed to be run as part of a cluster. If yours is, then great! But it's a non-trivial amount of
 work to make that happen, and the errors are really annoying and difficult to debug.
+* But, in our journey today we got to learn a bit about how ExUnit works and how the BEAM's code
+server works. I think this is really fun stuff to know about, and I hope you agree!
+* If your application literally has no state, or if your application is already set up for
+distribution, then this could offer some benefit to you. But I'd wager a guess that 99% of folks
+don't fit in one of those two buckets.
+* So, I still think this is super cool because it shows us a lot of the power of the BEAM and some
+of the really amazing things you can do (if you really need it), but because most people don't
+need many of these things, it's not super useful to our everyday lives.
+* Either way, I hope you learned something interesting and that you enjoyed the talk!
 
 ---
 class: center, middle
 
-But, in our journey today we got to learn a bit about how ExUnit works and how the BEAM's code
-server works. I think this is really fun stuff to know about, and I hope you agree!
+# Thank you! 🇵🇱
