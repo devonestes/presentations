@@ -326,50 +326,67 @@ this point, and that's what we're going to try and distribute across multiple no
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad1.png)
+![](/assets/images/run1.jpg)
 
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad2.png)
+![](/assets/images/run2.jpg)
 
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad3.png)
+![](/assets/images/run3.jpg)
 
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad4.png)
+![](/assets/images/run4.jpg)
 
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad5.png)
+![](/assets/images/run5.jpg)
 
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad6.png)
+![](/assets/images/run6.jpg)
 
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad7.png)
+![](/assets/images/run7.jpg)
 
 ---
 class: center, middle, img-width-940
 
-# Replace these images
-![](/assets/images/ad8.png)
+![](/assets/images/run8.jpg)
+
+---
+class: center, middle, img-width-940
+
+![](/assets/images/run9.jpg)
+
+---
+class: center, middle, img-width-940
+
+![](/assets/images/run10.jpg)
+
+---
+class: center, middle, img-width-940
+
+![](/assets/images/run11.jpg)
+
+---
+class: center, middle, img-width-940
+
+![](/assets/images/run12.jpg)
+
+---
+class: center, middle, img-width-940
+
+![](/assets/images/run13.jpg)
 
 ---
 class: center, middle
@@ -650,7 +667,7 @@ thing called a Code Server.
 ---
 class: center, middle
 
-# Need images
+![](/assets/images/cs1.jpg)
 
 ???
 
@@ -659,21 +676,9 @@ values are bytecode for functions. This part of the code server is called the `g
 table`.
 
 ---
-class: padding, middle
-
-```
-iex(1)> fun = fn -> :ok end
-#Function<45.40011524/0 in :erl_eval.expr/5>
-```
-???
-
-Each function in our application has a name. This name is usually the MFA (module, function &
-arity), but even private and anonymous functions actually have names in the BEAM code server.
-
----
 class: center, middle
 
-# Need images
+![](/assets/images/cs2.jpg)
 
 ???
 
@@ -686,7 +691,7 @@ problem.
 ---
 class: center, middle
 
-# Need images
+![](/assets/images/cs3.jpg)
 
 ???
 
@@ -697,7 +702,7 @@ module.
 ---
 class: center, middle
 
-# Need images
+![](/assets/images/cs4.jpg)
 
 ???
 
@@ -707,19 +712,12 @@ holds instructions for functions.
 ---
 class: center, middle
 
-# Need images
+![](/assets/images/cs5.jpg)
 
 ???
 
 It's also _really_ important to note that every BEAM node gets its _OWN_ code server. You can't
 share them across nodes. You _CAN_ however share .beam files across nodes.
-
----
-class: center, middle
-
-# Need images
-
-???
 
 When you boot a node, you can give it a path to a directory where .beam files are stored - this is
 called (plainly enough) the `code path`. This `code path` can even be changed at runtime if you're
@@ -735,6 +733,18 @@ wanted to make sure folks knew this existed so there's no confusion.
 
 Ok, so now that we've got a bit of that learning about how ExUnit works, and how the code server
 works, let's get back to the task at hand!
+
+---
+class: padding, middle
+
+```
+iex(1)> fun = fn -> :ok end
+#Function<45.40011524/0 in :erl_eval.expr/5>
+```
+???
+
+Each function in our application has a name. This name is usually the MFA (module, function &
+arity), but even private and anonymous functions actually have names in the BEAM code server.
 
 ---
 class: center, middle
@@ -868,14 +878,6 @@ class: padding, middle
 path here and doing a lot of things we shouldn't be doing, I don't blame them for this.
 * But I'll help you cut to the chase here - this is happening because of the two different code
 servers!
-
----
-class: center, middle
-
-# Need picture
-
-???
-
 * Another cool thing about ExUnit - it has its own compiler!
 * Our test modules are defined in .exs files, and that means they're not compiled by the standard
 Elixir compiler.
@@ -884,24 +886,6 @@ suffix) into the code server for the BEAM node that we've just started.
 * It does a bunch of other stuff, too!
 * So, we need to make sure that when we compile our actual test modules, that those get loaded
 onto all the code servers in our cluster.
-
----
-class: padding, middle
-
-```
-1) Example.Test.A: failure on setup_all callback, all tests have been invalidated
-     ** (UndefinedFunctionError) function Example.Test.A.__ex_unit__/2 is undefined or private.
-     Did you mean one of:
-
-           * __ex_unit__/0
-           * __ex_unit__/2
-
-     stacktrace:
-       Example.Test.A.__ex_unit__(:setup_all, %{case: Example.Test.A, module: Example.Test.A})
-```
-
-???
-
 * So this specific error makes a bit more sense, right? When the error occured on Node 2, the
 error was that the function was undefined or private. Basically, a function with that name wasn't
 in the code server.
