@@ -75,67 +75,344 @@ class: center, middle
 ---
 class: center, middle
 
-First we need to learn how ExUnit works
+# Parallel ➡️  Distributed
 
 ???
 
+* There's a saying that when you have true parallelism, that you get distribution for free, and
+we're going to see that in action today!
+* So today we're going to talk about taking something that is already running in parallel, and how
+to distribute that work across multiple nodes.
+* But unlike most times this saying is used, we're going to use real-world code that almost all of
+us have likely seen, and that's ExUnit.
+
 ---
 class: center, middle
 
-We async compile all the test .exs files
+![](/assets/images/how_it_works.jpg)
 
 ???
 
-* 
+* But before we can do that work, first we need to go over a bit about how ExUnit works, and
+specifically how it runs our tests in parallel.
 
 ---
-class: center, middle
+class: padding
 
-Once we do that, we start pulling any test modules that are async: true
+.center[
+# How it works
+]
+
+```
+def run() do
+  # ...
+end
+
+def loop(:async) do
+  # ...
+end
+
+def loop(:sync) do
+  # ...
+end
+
+def run_module(mod) do
+  # ...
+end
+
+def run_test(test) do
+  # ...
+end
+```
 
 ???
 
-*
+* This is a pretty high-level view of how ExUnit runs.
+* We've got that main `run` function, which you'll see called in your `test_helper.exs` file.
+* Then we've got these other functions, and we'll look a bit more at those in a second.
 
 ---
-class: center, middle
+class: padding
 
-Once all modules are loaded and all async tests have finished, we run the sync tests.
+.center[
+# How it works
+]
 
-But for today, we don't really care about those (and you shouldn't either, cause you shouldn't
-have more than a couple of them).
+```
+def run() do
+  # Do some things
+  loop(:async)
+  # Do some other things and return results
+end
+```
 
 ???
 
-* 
+* ExUnit does some setup of some other stuff that's not important for today, but the important
+thing is when ExUnit starts, it enters that loop, first looking for `async` modules.
 
 ---
-class: center, middle
+class: padding
 
-So, we're running these async tests - great! What if we want to distribute this work across a
-bunch of machines?
+.center[
+# How it works
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
 
 ???
 
+* This is a super simple version of that `loop` function.
+
+---
+class: padding
+
+.center[
+# How it works
+]
+
+```
+def loop(:async) do
+  case `wait_for_module(:async)` do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+???
+
+* Basically it's going to sit and wait for an async module to be ready to run.
+
+---
+class: padding
+
+.center[
+# How it works
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    `{:ok, mod}` ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+???
+
+* When it gets a message that a module is ready to run, it then spawns a process.
+
+---
+class: padding
+
+.center[
+# How it works
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      `spawn(fn -> run_module(mod) end)`
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+???
+
+* And this process runs the tests in that module.
+* This is important to note - the unit of paralleism in ExUnit is the module, not the test! Each
+module can be run in parallel, but tests within that module are still run in series.
+
+---
+class: padding
+
+.center[
+# How it works
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      `loop(:async)`
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+???
+
+* It then goes back into the loop once the process is spawned, waiting for another module to be
+ready to run.
+
+---
+class: padding
+
+.center[
+# How it works
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    `{:error, :no_more_async_modules}` ->
+      loop(:sync)
+  end
+end
+```
+
+???
+* Or when there are no more async modules to be run, it moves on and runs the modules that need to
+be run in series.
+
+---
+class: padding
+
+.center[
+# How it works
+]
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      `loop(:sync)`
+  end
+end
+```
+
+???
+
+* For today, we don't really care about that part. All the fun parallel stuff is basically done at
+this point, and that's what we're going to try and distribute across multiple nodes.
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad1.png)
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad2.png)
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad3.png)
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad4.png)
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad5.png)
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad6.png)
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad7.png)
+
+---
+class: center, middle, img-width-940
+
+# Replace these images
+![](/assets/images/ad8.png)
 
 ---
 class: center, middle
 
-Well, we use `Node.spawn/2`. That's it - thank you for coming to my TED talk!
+# Parallel ➡️  Distributed
+
+???
+
+* Ok, so we've seen a bit about how it works in parallel, but now let's get to the meat of the
+talk - running distributed!
 
 ---
 class: center, middle
 
-Just kidding - that doesn't work at all. It's _WAY_ more complicated than that!
-And that's the fun stuff we'll be looking at today. We'll be moving a bit quick,
-but if there's anything you want further information about you can always ask in
-the Q&A after or find me in the hallway and we can chat more.
+# `Node.spawn/2`
+## &nbsp;
 
 ---
 class: center, middle
 
-Of course we need an example, and here's the example we're going to use for today.
+# `Node.spawn/2`
+## Thank you for coming to my TED talk
 
+---
+class: center, middle
+
+![](/assets/images/draw_an_owl.jpg)
+
+???
+
+* It would be nice if it were that easy, but it's not! A lot of people talk about distribution in
+this sort of way.
+* "Just spawn a process on a different node - done!"
+* But let's fill in some of those steps that are missing.
+
+---
+class: padding
+
+.center[
+# Our example tests
+]
+
+```
 # test/my_test.exs
 
 for letter <- ?A..?Z do
@@ -153,84 +430,133 @@ for letter <- ?A..?Z do
     defp fib(n) do fib(n-1) + fib(n-2) end
   end
 end
+```
+
+???
+
+* Because we saw earlier that the unit of parallelism in ExUnit is the module, we'll need a bunch
+of modules to run.
+* We'll do some light metaprogramming for that!
 
 ---
-class: center, middle
+class: padding
 
-So on my machine, if I run these in series I see this:
+.center[
+# In Series
+]
 
-mix test test/device_tracker/example_test.exs
+```
+$ mix test test/device_tracker/example_test.exs
 ..........................
 
 Finished in 19.1 seconds (0.00s async, 19.1s sync)
 26 tests, 0 failures
+```
+
+???
+
+* If I run these tests on a slow computer I happened to have lying around, I see this
 
 ---
-class: center, middle
+class: padding
 
-And if I run them in parallel I see this:
+.center[
+# In Parallel
+]
 
-mix test test/device_tracker/example_test.exs
+```
+$ mix test test/device_tracker/example_test.exs
 ..........................
 
 Finished in 7.2 seconds (7.2s async, 0.00s sync)
 26 tests, 0 failures
+```
+
+???
+* And I see this if I run them in parallel - 62% faster! This is nice, but we can do better.
+* These are our starting benchmarks here that we're going to try and improve upon.
 
 ---
 class: center, middle
 
-Not a bad increase, but I think we can do better. So, let's first try the naive way of doing this
-- hacking around ExUnit and seeing what happens!
+# Monkey Patching ExUnit
+
+???
+
+* So the first thing we'll try is just monkey patching ExUnit and doing the simple thing I
+mentioned above.
+* A technique to add, modify, or suppress the default behavior of a piece of code at runtime
+without changing its original source code.
+* A lot of folks don't really know you can do this, but you can!
 
 ---
 class: center, middle
 
-The first thing we're going to do is Monkey Patch ExUnit 😀
-I bet you didn't know that was something you could do, right?! But it is!
+# 😈
+
+???
+
+* This is generally a "bad thing" to do, though, so please don't actually try this in production
+applications.
 
 ---
-class: center, middle
+class: padding, middle
 
-How many times have you seen this message:
-
-warning: redefining module ExUnit (current version loaded from /home/devon/.asdf/installs/elixir/1.12.2-otp-23/bin/../lib/ex_unit/ebin/Elixir.ExUnit.beam)
+```bash
+warning: redefining module ExUnit (current version loaded from
+/home/devon/.asdf/installs/elixir/1.12.2-otp-23/bin/../lib/ex_unit/ebin/Elixir.ExUnit.beam)
   test/test_helper.exs:79
+```
 
----
-class: center, middle
+???
 
-What that message is saying is "Hey! You had already given me a module with that name to load into
+* When you do this, you'll see a message like this telling you you're redefining a module that's
+already been defined.
+* It does this because usually this is a mistake, not something you do on purpose
+* What that message is saying is "Hey! You had already given me a module with that name to load into
 the code server, but now you're giving me a new one!"
+* How do we know to emit this message?
 
 ---
 class: center, middle
 
-And how does Elixir know that we're redefining a module when we do that? Well, we can thank the
-BEAM code server for that!
+# Code Server 💾
+
+???
+
+* We know this because the BEAM (which is the VM that Elixir & Erlang applications run on) has a
+thing called a Code Server.
+* Let's try and understand this quickly before moving on.
 
 ---
 class: center, middle
 
-So, before we go any further, we need to learn a bit about the code server and how it works.
+# Need images
 
----
-class: center, middle
+???
 
 You can think of the code server as a big key-value store, where keys are function names and
 values are bytecode for functions. This part of the code server is called the `global export
 table`.
 
 ---
-class: center, middle
+class: padding, middle
+
+```
+iex(1)> fun = fn -> :ok end
+#Function<45.40011524/0 in :erl_eval.expr/5>
+```
+???
 
 Each function in our application has a name. This name is usually the MFA (module, function &
 arity), but even private and anonymous functions actually have names in the BEAM code server.
 
-fun = fn -> :ok end
-#Function<45.40011524/0 in :erl_eval.expr/5>
-
 ---
 class: center, middle
+
+# Need images
+
+???
 
 For the most part (of course there are exceptions), the code server deals with modules. You can
 load or unload a module from the code server, and the code server actually keeps _two_ versions of
@@ -241,6 +567,10 @@ problem.
 ---
 class: center, middle
 
+# Need images
+
+???
+
 And in reality, the .beam files that Elixir (and other BEAM languages) emit are really just
 instructions about how to populate this code server! That's why we get one .beam file for each
 module.
@@ -248,11 +578,19 @@ module.
 ---
 class: center, middle
 
+# Need images
+
+???
+
 So, we've got .beam files, and these .beam files populate the code server, and the code server
 holds instructions for functions.
 
 ---
 class: center, middle
+
+# Need images
+
+???
 
 It's also _really_ important to note that every BEAM node gets its _OWN_ code server. You can't
 share them across nodes. You _CAN_ however share .beam files across nodes.
@@ -260,26 +598,21 @@ share them across nodes. You _CAN_ however share .beam files across nodes.
 ---
 class: center, middle
 
+# Need images
+
+???
+
 When you boot a node, you can give it a path to a directory where .beam files are stored - this is
 called (plainly enough) the `code path`. This `code path` can even be changed at runtime if you're
 in interactive mode (there are two modes for a BEAM node).
 
----
-class: center, middle
-
 So this code server is really, really important, and especially important to the task we're
 undertaking today of trying to get ExUnit to run on multiple nodes.
-
----
-class: center, middle
 
 Another thing to mention - Elixir also has its own code server! But that's really just used for
 compilation, and so we're not going to cover that today. We'll be covering some stuff that's
 private in Elixir & ExUnit, but the Elixir code server is super duper private, and so I just
 wanted to make sure folks knew this existed so there's no confusion.
-
----
-class: center, middle
 
 Ok, so now that we've got a bit of that learning about how ExUnit works, and how the code server
 works, let's get back to the task at hand!
@@ -287,9 +620,78 @@ works, let's get back to the task at hand!
 ---
 class: center, middle
 
+# Monkey Patching ExUnit
+
+???
+
 So, here's the plan - since the unit of parallelism in ExUnit is the module, not the test, we're
 going to try distributing this work by modules and not by individual tests. This means that module
 A runs on machine 1, module B runs on machine 2, etc.
+
+---
+class: middle, padding
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      spawn(fn -> run_module(mod) end)
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+???
+
+* So if this is where the parallelism happens in ExUnit's runner, let's try and make it
+distributed in the simplest possible way.
+
+---
+class: middle, padding
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      `node = Enum.random([Node.self() | Node.list()])`
+      spawn(fn -> run_module(mod))
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+???
+
+* First, let's get a node on which we can run this. For now we'll just do a random node from all
+nodes in the cluster.
+
+---
+class: middle, padding
+
+```
+def loop(:async) do
+  case wait_for_module(:async) do
+    {:ok, mod} ->
+      node = Enum.random([Node.self() | Node.list()])
+      `Node.spawn(node, fn -> run_module(mod))`
+      loop(:async)
+
+    {:error, :no_more_async_modules} ->
+      loop(:sync)
+  end
+end
+```
+
+???
+
+* Node.spawn/2 just lets us spawn a process on a given node. You can think of Kernel.spawn/1 as
+shorthand for this.
 
 ---
 class: center, middle
