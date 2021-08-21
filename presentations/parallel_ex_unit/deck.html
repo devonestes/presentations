@@ -483,15 +483,73 @@ for letter <- ?A..?Z do
   defmodule Module.concat([Example, Test, to_string([letter])]) do
     use ExUnit.Case, async: true
 
+
+
+
+
+
+
+
+
+
+  end
+end
+```
+
+???
+
+---
+class: padding
+
+.center[
+# Our example tests
+]
+
+```
+# test/my_test.exs
+
+for letter <- ?A..?Z do
+  defmodule Module.concat([Example, Test, to_string([letter])]) do
+    use ExUnit.Case, async: true
+
+    test "calculates the fibonacci numbers" do
+
+
+
+    end
+
+
+
+
+  end
+end
+```
+
+???
+
+---
+class: padding
+
+.center[
+# Our example tests
+]
+
+```
+# test/my_test.exs
+
+for letter <- ?A..?Z do
+  defmodule Module.concat([Example, Test, to_string([letter])]) do
+    use ExUnit.Case, async: true
+
     test "calculates the fibonacci numbers" do
       for num <- 1..35 do
         assert fib(num) > 0
       end
     end
 
-    defp fib(0) do 0 end
-    defp fib(1) do 1 end
-    defp fib(n) do fib(n-1) + fib(n-2) end
+    defp fib(0), do: 0
+    defp fib(1), do: 1
+    defp fib(n), do: fib(n-1) + fib(n-2)
   end
 end
 ```
@@ -540,7 +598,7 @@ Finished in 7.2 seconds (7.2s async, 0.00s sync)
 ---
 class: center, middle
 
-# Monkey Patching ExUnit
+# Monkey Patching ExUnit 🐒
 
 ???
 
@@ -681,7 +739,7 @@ works, let's get back to the task at hand!
 ---
 class: center, middle
 
-# Monkey Patching ExUnit
+# Monkey Patching ExUnit 🐒
 
 ???
 
@@ -885,7 +943,7 @@ compiler to look like this so we load all the test modules on all nodes.
 class: padding, middle
 
 ```
-case Kernel.ParallelCompiler.require(test_files, parallel_require_callbacks) do
+case Kernel.ParallelCompiler.require(test_files, callbacks) do
   {:ok, _, _} -> :ok
   {:error, _, _} -> exit({:shutdown, 1})
 end
@@ -894,8 +952,7 @@ end
 # becomes
 
 
-args = [test_files, parallel_require_callbacks]
-{results, _} = :rpc.multicall(Kernel.ParallelCompiler, :require, args)
+{results, _} = :rpc.multicall(Kernel.ParallelCompiler, :require, [test_files, callbacks])
 
 Enum.each(results, fn
   {:ok, _, _} -> :ok
