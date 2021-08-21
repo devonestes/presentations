@@ -416,7 +416,71 @@ class: padding
 # test/my_test.exs
 
 for letter <- ?A..?Z do
-  defmodule String.to_atom("Elixir.Example.Test.#{[letter]}") do
+
+
+
+
+
+
+
+
+
+
+
+
+
+end
+```
+
+???
+
+* Because we saw earlier that the unit of parallelism in ExUnit is the module, we'll need a bunch
+of modules to run.
+* We'll do some light metaprogramming for that!
+
+---
+class: padding
+
+.center[
+# Our example tests
+]
+
+```
+# test/my_test.exs
+
+for letter <- ?A..?Z do
+  defmodule Module.concat([Example, Test, to_string([letter])]) do
+
+
+
+
+
+
+
+
+
+
+
+  end
+end
+```
+
+???
+
+* Here's the extent of our metaprogramming, just letting us define 26 modules in a loop
+
+---
+class: padding
+
+.center[
+# Our example tests
+]
+
+```
+# test/my_test.exs
+
+for letter <- ?A..?Z do
+  defmodule Module.concat([Example, Test, to_string([letter])]) do
     use ExUnit.Case, async: true
 
     test "calculates the fibonacci numbers" do
@@ -434,9 +498,6 @@ end
 
 ???
 
-* Because we saw earlier that the unit of parallelism in ExUnit is the module, we'll need a bunch
-of modules to run.
-* We'll do some light metaprogramming for that!
 
 ---
 class: padding
@@ -945,28 +1006,32 @@ basically just run a single test, so probably around 1 second.
 ---
 class: center, middle
 
-# :code
-# :rpc
-
-???
-
-* Erlang gives us the really important stuff we need to make this work, so I'd really recommend
-looking into some of the stuff in these modules. While it's not as easy as drawing the rest of the
-owl, it really isn't that difficult to get the basics up and working.
-
----
-class: center, middle
-
 ![](/assets/images/useful_cool_8.jpg)
 
 ???
 
 * So, you might be thinking to yourself right now "but Devon, this all seems really useful! We could
-set up super-fast CI servers with a couple raspberry PIs that can run a long test suite super
-quick!
+set up super-fast CI servers with a couple raspberry PIs that can run a long test suite super quick!
+
+---
+class: center, middle
+
+![](/assets/images/draw_an_owl_circled.jpg)
+
+???
+
 * Yeah, if your application is dead simple, that can work. But most applications really aren't
 designed to be run as part of a cluster. If yours is, then great! But it's a non-trivial amount of
 work to make that happen, and the errors are really annoying and difficult to debug.
+
+---
+class: center, middle
+
+# :code
+# :rpc
+
+???
+
 * But, in our journey today we got to learn a bit about how ExUnit works and how the BEAM's code
 server works. I think this is really fun stuff to know about, and I hope you agree!
 * If your application literally has no state, or if your application is already set up for
@@ -976,6 +1041,9 @@ don't fit in one of those two buckets.
 of the really amazing things you can do (if you really need it), but because most people don't
 need many of these things, it's not super useful to our everyday lives.
 * Either way, I hope you learned something interesting and that you enjoyed the talk!
+* Erlang gives us the really important stuff we need to make this work, so I'd really recommend
+looking into some of the stuff in these modules. If you ever find yourself needing to draw the
+rest of that owl, these two modules will likely have some answers for your questions.
 
 ---
 class: center, middle
