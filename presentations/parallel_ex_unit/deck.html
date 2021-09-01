@@ -14,63 +14,8 @@ class: center, middle, headline
 ### with ExUnit
 
 ???
-* This talk is one of my favorite kinds of talks.
 
----
-class: center, middle
-
-![](/assets/images/useful_cool_1.jpg)
-
-???
-
----
-class: center, middle
-
-![](/assets/images/useful_cool_2.jpg)
-
-???
-
----
-class: center, middle
-
-![](/assets/images/useful_cool_3.jpg)
-
-???
-
----
-class: center, middle
-
-![](/assets/images/useful_cool_4.jpg)
-
-???
-
----
-class: center, middle
-
-![](/assets/images/useful_cool_5.jpg)
-
-???
-
----
-class: center, middle
-
-![](/assets/images/useful_cool_6.jpg)
-
-???
-
----
-class: center, middle
-
-![](/assets/images/useful_cool_7.jpg)
-
-???
-
----
-class: center, middle
-
-![](/assets/images/useful_cool_8.jpg)
-
-???
+* Super excited
 
 ---
 class: center, middle
@@ -89,7 +34,34 @@ us have likely seen, and that's ExUnit.
 ---
 class: center, middle
 
-![](/assets/images/how_it_works.jpg)
+# What we won't cover
+## &nbsp;
+## &nbsp;
+
+???
+
+---
+class: center, middle
+
+# What we won't cover
+## Creating/joining a cluster
+## &nbsp;
+
+???
+
+---
+class: center, middle
+
+# What we won't cover
+## Creating/joining a cluster
+## Too much specific code
+
+???
+
+---
+class: center, middle
+
+# 🤔
 
 ???
 
@@ -104,24 +76,26 @@ class: padding
 ]
 
 ```
-def run() do
-  # ...
-end
+defmodule ExUnit.Runner do
+  def run() do
+    # ...
+  end
 
-def loop(:async) do
-  # ...
-end
+  def loop(:async) do
+    # ...
+  end
 
-def loop(:sync) do
-  # ...
-end
+  def loop(:sync) do
+    # ...
+  end
 
-def run_module(mod) do
-  # ...
-end
+  def run_module(mod) do
+    # ...
+  end
 
-def run_test(test) do
-  # ...
+  def run_test(test) do
+    # ...
+  end
 end
 ```
 
@@ -198,6 +172,8 @@ end
 ???
 
 * Basically it's going to sit and wait for an async module to be ready to run.
+* It does this because our test files are compiled asynchronously and in parallel, so when one is
+ready to run we get a message about that.
 
 ---
 class: padding
@@ -247,7 +223,8 @@ end
 
 * And this process runs the tests in that module.
 * This is important to note - the unit of paralleism in ExUnit is the module, not the test! Each
-module can be run in parallel, but tests within that module are still run in series.
+module can be run in parallel, but tests within that module are still run in series even though
+they're run in individual processes for isolation reasons.
 
 ---
 class: padding
@@ -328,65 +305,116 @@ class: center, middle, img-width-940
 
 ![](/assets/images/run1.jpg)
 
+???
+
+* So we can think of this one as our "main" process that represents that ExUnit runner
+
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run2.jpg)
+
+???
+
+* Then we have compilation of our test modules happening in another process
 
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run3.jpg)
 
+???
+
+* When a module is ready to run, a message is sent to our runner
+
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run4.jpg)
+
+???
+
+* And if the module is an async module, then our runner spawns another process that is in charge
+of running the tests in that module
 
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run5.jpg)
 
+???
+
+* And this process keeps on going, of our ExUnit Runner spawning other processes per test module.
+
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run6.jpg)
+
+???
+
 
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run7.jpg)
 
+???
+
+
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run8.jpg)
+
+???
+
 
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run9.jpg)
 
+???
+
+
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run10.jpg)
+
+???
+
 
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run11.jpg)
 
+???
+
+* Now normally, this all happens within the bounds of a single node
+* A node here is defined as a single instance of the BEAM VM
+
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run12.jpg)
 
+???
+
+* But what we're going to do today is to try and change things so that just the compilation and
+runner is happening on that "main" node
+
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run13.jpg)
+
+???
+
+* And then we can distribute the work of running the tests in each of these modules to their own
+nodes
 
 ---
 class: center, middle
@@ -401,19 +429,26 @@ talk - running distributed!
 ---
 class: center, middle
 
-# `Node.spawn/2`
+## `spawn(fn -> run_module(module) end)`
 ## &nbsp;
 
 ---
 class: center, middle
 
-# `Node.spawn/2`
-## Thank you for coming to my TED talk
+## ~~`spawn(fn -> run_module(module) end)`~~
+## &nbsp;
 
 ---
 class: center, middle
 
-![](/assets/images/draw_an_owl.jpg)
+## `Node.spawn(node, fn -> run_module(module) end)`
+## &nbsp;
+
+---
+class: center, middle
+
+## `Node.spawn(node, fn -> run_module(module) end)`
+## Thank you for coming to my TED talk
 
 ???
 
@@ -689,6 +724,18 @@ whole "keeping the current and previous version around" thing is so you can roll
 problem.
 
 ---
+class: padding, middle
+
+```
+iex(1)> fun = fn -> :ok end
+#Function<45.40011524/0 in :erl_eval.expr/5>
+```
+???
+
+Each function in our application has a name. This name is usually the MFA (module, function &
+arity), but even private and anonymous functions actually have names in the BEAM code server.
+
+---
 class: center, middle
 
 ![](/assets/images/cs3.jpg)
@@ -716,12 +763,9 @@ class: center, middle
 
 ???
 
-It's also _really_ important to note that every BEAM node gets its _OWN_ code server. You can't
-share them across nodes. You _CAN_ however share .beam files across nodes.
-
-When you boot a node, you can give it a path to a directory where .beam files are stored - this is
-called (plainly enough) the `code path`. This `code path` can even be changed at runtime if you're
-in interactive mode (there are two modes for a BEAM node).
+When you boot a node, you can give it one (or more) paths to directories where .beam files are
+stored - this is called (plainly enough) the `code path`. This `code path` can even be changed at
+runtime if you're in interactive mode (there are two modes for a BEAM node).
 
 So this code server is really, really important, and especially important to the task we're
 undertaking today of trying to get ExUnit to run on multiple nodes.
@@ -733,18 +777,6 @@ wanted to make sure folks knew this existed so there's no confusion.
 
 Ok, so now that we've got a bit of that learning about how ExUnit works, and how the code server
 works, let's get back to the task at hand!
-
----
-class: padding, middle
-
-```
-iex(1)> fun = fn -> :ok end
-#Function<45.40011524/0 in :erl_eval.expr/5>
-```
-???
-
-Each function in our application has a name. This name is usually the MFA (module, function &
-arity), but even private and anonymous functions actually have names in the BEAM code server.
 
 ---
 class: center, middle
@@ -822,8 +854,8 @@ end
 
 ???
 
-* Node.spawn/2 just lets us spawn a process on a given node. You can think of Kernel.spawn/1 as
-shorthand for this.
+* Node.spawn/2 just lets us spawn a process on a given node.
+* So this is the change we'd like to make - how are we able to do that?
 
 ---
 class: middle, padding
@@ -876,14 +908,22 @@ class: padding, middle
 * You'll actually get a spectacularly confusing error here!
 * Usually this sort of thing in Elixir is considered a bug, but since we're _WAY_ off the beaten
 path here and doing a lot of things we shouldn't be doing, I don't blame them for this.
-* But I'll help you cut to the chase here - this is happening because of the two different code
-servers!
+* But I'll help you cut to the chase here - this is happening because of there are two different
+code servers!
+
+---
+class: padding, middle
+
 * Another cool thing about ExUnit - it has its own compiler!
 * Our test modules are defined in .exs files, and that means they're not compiled by the standard
 Elixir compiler.
 * When we run `mix test`, it compiles and loads all our test files (based on the `_test.exs`
 suffix) into the code server for the BEAM node that we've just started.
 * It does a bunch of other stuff, too!
+
+---
+class: padding, middle
+
 * So, we need to make sure that when we compile our actual test modules, that those get loaded
 onto all the code servers in our cluster.
 * So this specific error makes a bit more sense, right? When the error occured on Node 2, the
@@ -892,8 +932,81 @@ in the code server.
 * But then when ExUnit formatted that error for us, it did that formatting on the main node which
 _DID_ have that function in the code server, and it uses this information for the "Did you mean"
 recommendation there.
-* So, if we want to distribute this work, we've gotta load these modules into the code servers on
-these other nodes.
+* So, if we want to distribute this work, we have to also load these modules into the code servers
+on these other nodes.
+
+---
+class: middle, padding
+
+```
+path = :code.get_path()
+
+
+
+  
+    
+　   
+```
+
+???
+
+* Now, normally if you want to load code into a code server, you can do that by
+sharing the code path.
+
+---
+class: middle, padding
+
+```
+path = :code.get_path()
+:rpc.multicall(Node.list(), :code, :set_path, [path])
+
+
+
+
+
+```
+
+???
+
+
+* Remember, we can set that at runtime!
+
+---
+class: middle, padding
+
+```
+path = :code.get_path()
+:rpc.multicall(Node.list(), :code, :set_path, [path])
+
+# or
+
+
+
+```
+
+???
+
+
+* But for these .exs files, we don't actually write .beam files to disk, so that won't work!
+
+---
+class: middle, padding
+
+```
+path = :code.get_path()
+:rpc.multicall(Node.list(), :code, :set_path, [path])
+
+# or
+
+{module, binary, filename} = :code.get_object_code(Example.Test.A)
+
+```
+
+???
+
+* The other normal way you can load code into a code server is by giving the code server the info
+it would normally find in the .beam file via a function call to `:code.load_binary/3`. This works
+well for sure, but there's kind of another hitch.
 
 ---
 class: middle, padding
@@ -910,18 +1023,62 @@ path = :code.get_path()
 
 ???
 
-* Now, normally if you want to load code into a code server, you can do that by
-sharing the code path (remember, we can set that at runtime!).
-* But for these .exs files, we don't actually write .beam files to disk, so that won't work!
-* The other normal way you can load code into a code server is by giving the code server the info
-it would normally find in the .beam file via a function call to `:code.load_binary/3`. This works
-well for sure, but there's kind of another hitch.
 * Normally when you do this, you would get the info for the code you want to load with
 `:code.get_object_code/1`. But that doesn't actually pull the code from the code server - it pulls
 it from the .beam files - and since we don't have .beam files for these test modules,
 :code.get_object_code/1 errors!
-* So, we've gotta make another change to how ExUnit works. Basically, we need to modify the ExUnit
-compiler to look like this so we load all the test modules on all nodes.
+* So, we've gotta make another change to how ExUnit works.
+* One thing that we sort of skipped earlier is how ExUnit compiles these test modules.
+
+---
+class: padding, middle
+
+```
+case Kernel.ParallelCompiler.require(test_files, callbacks) do
+  {:ok, _, _} -> :ok
+  {:error, _, _} -> exit({:shutdown, 1})
+end
+
+
+
+
+
+
+
+
+
+
+
+```
+
+???
+
+* ExUnit actually has its own compiler that is uses to find & compile your test modules for you.
+
+---
+class: padding, middle
+
+```
+case Kernel.ParallelCompiler.require(test_files, callbacks) do
+  {:ok, _, _} -> :ok
+  {:error, _, _} -> exit({:shutdown, 1})
+end
+
+
+# becomes
+
+
+
+
+
+
+
+
+```
+
+???
+
+* Basically, we need to modify this compiler so we load all the test modules on all nodes.
 
 ---
 class: padding, middle
@@ -948,8 +1105,7 @@ end)
 
 * With this change we'll now compile and load all the test files on all nodes instead of just the
 one that was started when you ran `mix test`.
-* Also funny to note - trying to compile Elixir files synchronously is actually surprisingly
-difficult, so we're just not going to do that today.
+* This means that your cluster must be set up before you get to this point.
 
 ---
 class: center, middle
@@ -1043,16 +1199,19 @@ Finished in 3.7 seconds (3.7s async, 0.00s sync)
 * 48% faster than parallel
 * Given 26 cores and a bit of optimization, you could get this down to the time it take to
 basically just run a single test, so probably around 1 second.
+* So, you might be thinking to yourself right now "this sounds great! We can set up super-fast CI
+servers with a couple raspberry PIs that can run a long test suite super quick!"
 
 ---
 class: center, middle
 
-![](/assets/images/useful_cool_8.jpg)
+![](/assets/images/draw_an_owl.jpg)
 
 ???
 
-* So, you might be thinking to yourself right now "but Devon, this all seems really useful! We could
-set up super-fast CI servers with a couple raspberry PIs that can run a long test suite super quick!
+* You may have seen this joke before about how to draw an owl. The idea is that by making the
+beginning of it seem super easy that the whole process then looks easy when it's really quite
+hard.
 
 ---
 class: center, middle
@@ -1061,9 +1220,11 @@ class: center, middle
 
 ???
 
-* Yeah, if your application is dead simple, that can work. But most applications really aren't
-designed to be run as part of a cluster. If yours is, then great! But it's a non-trivial amount of
-work to make that happen, and the errors are really annoying and difficult to debug.
+* What we covered today was really just that first step in drawing an owl.
+* If your Elixir applications store no state at all, or if the application is already designed to
+be used in a cluster, then indeed this can work! But most applications really aren't designed to
+be run as part of a cluster. If yours is, then great! But it's a non-trivial amount of work to
+make that happen, and the errors are really annoying and difficult to debug.
 
 ---
 class: center, middle
