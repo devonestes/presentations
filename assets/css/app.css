@@ -201,6 +201,14 @@ li {
   background-position: 0 0;
 }
 
+.img-full p:nth-child(2) {
+  height: 66%
+}
+
+.img-full img {
+  width: 100%
+}
+
 .max-img-width-940 img {
   max-height: 475px;
   max-width: 940px;
