@@ -18,25 +18,15 @@ class: center, middle, headline
 * Super excited
 
 ---
-class: center, middle, img-full
-
-![I know the way!](/assets/images/i_know_the_way.gif)
-
-???
-
----
 class: center, middle
 
 # Parallel ➡️  Distributed
 
 ???
 
-* There's a saying that when you have true parallelism, that you get distribution for free, and
-we're going to see that in action today!
-* So today we're going to talk about taking something that is already running in parallel, and how
-to distribute that work across multiple nodes.
-* But unlike most times this saying is used, we're going to use real-world code that almost all of
-us have likely seen, and that's ExUnit.
+* Have parallel, distributed free
+* Not theoretical 
+* Real world example ExUnit!
 
 ---
 class: center, middle
@@ -72,8 +62,7 @@ class: center, middle
 
 ???
 
-* But before we can do that work, first we need to go over a bit about how ExUnit works, and
-specifically how it runs our tests in parallel.
+* First learn how it works
 
 ---
 class: padding
@@ -108,10 +97,6 @@ end
 
 ???
 
-* This is a pretty high-level view of how ExUnit runs.
-* We've got that main `run` function, which you'll see called in your `test_helper.exs` file.
-* Then we've got these other functions, and we'll look a bit more at those in a second.
-
 ---
 class: padding
 
@@ -128,9 +113,6 @@ end
 ```
 
 ???
-
-* ExUnit does some setup of some other stuff that's not important for today, but the important
-thing is when ExUnit starts, it enters that loop, first looking for `async` modules.
 
 ---
 class: padding
@@ -153,8 +135,6 @@ end
 ```
 
 ???
-
-* This is a super simple version of that `loop` function.
 
 ---
 class: padding
@@ -178,10 +158,6 @@ end
 
 ???
 
-* Basically it's going to sit and wait for an async module to be ready to run.
-* It does this because our test files are compiled asynchronously and in parallel, so when one is
-ready to run we get a message about that.
-
 ---
 class: padding
 
@@ -203,8 +179,6 @@ end
 ```
 
 ???
-
-* When it gets a message that a module is ready to run, it then spawns a process.
 
 ---
 class: padding
@@ -228,11 +202,6 @@ end
 
 ???
 
-* And this process runs the tests in that module.
-* This is important to note - the unit of paralleism in ExUnit is the module, not the test! Each
-module can be run in parallel, but tests within that module are still run in series even though
-they're run in individual processes for isolation reasons.
-
 ---
 class: padding
 
@@ -255,9 +224,6 @@ end
 
 ???
 
-* It then goes back into the loop once the process is spawned, waiting for another module to be
-ready to run.
-
 ---
 class: padding
 
@@ -279,8 +245,6 @@ end
 ```
 
 ???
-* Or when there are no more async modules to be run, it moves on and runs the modules that need to
-be run in series.
 
 ---
 class: padding
@@ -304,17 +268,12 @@ end
 
 ???
 
-* For today, we don't really care about that part. All the fun parallel stuff is basically done at
-this point, and that's what we're going to try and distribute across multiple nodes.
-
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run1.jpg)
 
 ???
-
-* So we can think of this one as our "main" process that represents that ExUnit runner
 
 ---
 class: center, middle, img-width-940
@@ -323,16 +282,12 @@ class: center, middle, img-width-940
 
 ???
 
-* Then we have compilation of our test modules happening in another process
-
 ---
 class: center, middle, img-width-940
 
 ![](/assets/images/run3.jpg)
 
 ???
-
-* When a module is ready to run, a message is sent to our runner
 
 ---
 class: center, middle, img-width-940
@@ -341,9 +296,6 @@ class: center, middle, img-width-940
 
 ???
 
-* And if the module is an async module, then our runner spawns another process that is in charge
-of running the tests in that module
-
 ---
 class: center, middle, img-width-940
 
@@ -351,7 +303,6 @@ class: center, middle, img-width-940
 
 ???
 
-* And this process keeps on going, of our ExUnit Runner spawning other processes per test module.
 
 ---
 class: center, middle, img-width-940
@@ -400,8 +351,8 @@ class: center, middle, img-width-940
 
 ???
 
-* Now normally, this all happens within the bounds of a single node
-* A node here is defined as a single instance of the BEAM VM
+* Normall, single node
+* Node = single instance of BEAM VM
 
 ---
 class: center, middle, img-width-940
@@ -410,8 +361,7 @@ class: center, middle, img-width-940
 
 ???
 
-* But what we're going to do today is to try and change things so that just the compilation and
-runner is happening on that "main" node
+* Today - we add more nodes
 
 ---
 class: center, middle, img-width-940
@@ -420,8 +370,7 @@ class: center, middle, img-width-940
 
 ???
 
-* And then we can distribute the work of running the tests in each of these modules to their own
-nodes
+* Distribute the work across the cluster
 
 ---
 class: center, middle
@@ -430,8 +379,8 @@ class: center, middle
 
 ???
 
-* Ok, so we've seen a bit about how it works in parallel, but now let's get to the meat of the
-talk - running distributed!
+* We've covered the first part
+* Now on to the second part
 
 ---
 class: center, middle
@@ -459,8 +408,7 @@ class: center, middle
 
 ???
 
-* It would be nice if it were that easy, but it's not! A lot of people talk about distribution in
-this sort of way.
+* It would be nice if it were that easy
 * "Just spawn a process on a different node - done!"
 * But let's fill in some of those steps that are missing.
 
@@ -472,7 +420,7 @@ class: padding
 ]
 
 ```
-# test/my_test.exs
+# test/example_test.exs
 
 for letter <- ?A..?Z do
 
@@ -493,8 +441,7 @@ end
 
 ???
 
-* Because we saw earlier that the unit of parallelism in ExUnit is the module, we'll need a bunch
-of modules to run.
+* We need many modules to run
 * We'll do some light metaprogramming for that!
 
 ---
@@ -505,7 +452,7 @@ class: padding
 ]
 
 ```
-# test/my_test.exs
+# test/example_test.exs
 
 for letter <- ?A..?Z do
   defmodule Module.concat([Example, Test, to_string([letter])]) do
@@ -526,7 +473,7 @@ end
 
 ???
 
-* Here's the extent of our metaprogramming, just letting us define 26 modules in a loop
+* Just defining 26 modules in a loop
 
 ---
 class: padding
@@ -536,7 +483,7 @@ class: padding
 ]
 
 ```
-# test/my_test.exs
+# test/example_test.exs
 
 for letter <- ?A..?Z do
   defmodule Module.concat([Example, Test, to_string([letter])]) do
@@ -565,7 +512,7 @@ class: padding
 ]
 
 ```
-# test/my_test.exs
+# test/example_test.exs
 
 for letter <- ?A..?Z do
   defmodule Module.concat([Example, Test, to_string([letter])]) do
@@ -594,7 +541,7 @@ class: padding
 ]
 
 ```
-# test/my_test.exs
+# test/example_test.exs
 
 for letter <- ?A..?Z do
   defmodule Module.concat([Example, Test, to_string([letter])]) do
@@ -651,31 +598,28 @@ Finished in 7.2 seconds (7.2s async, 0.00s sync)
 ```
 
 ???
-* And I see this if I run them in parallel - 62% faster! This is nice, but we can do better.
-* These are our starting benchmarks here that we're going to try and improve upon.
+* 62% faster!
+* These are our starting benchmarks
 
 ---
 class: center, middle
+![](/assets/images/indy1_text.jpeg)
 
-# Monkey Patching ExUnit 🐒
+---
+class: center, middle
+![](/assets/images/indy2_text.jpeg)
+
+---
+class: center, middle
+![](/assets/images/indy3.jpg)
 
 ???
 
-* So the first thing we'll try is just monkey patching ExUnit and doing the simple thing I
-mentioned above.
 * A technique to add, modify, or suppress the default behavior of a piece of code at runtime
 without changing its original source code.
-* A lot of folks don't really know you can do this, but you can!
-
----
-class: center, middle
-
-# 😈
-
-???
-
-* This is generally a "bad thing" to do, though, so please don't actually try this in production
-applications.
+* Little known trick
+* Better known as "Hot Code Loading"!
+* Don't do this!
 
 ---
 class: padding, middle
@@ -886,14 +830,13 @@ We need to remember that we're copying & pasting the WHOLE MODULE, and then maki
 that we want to make.
 
 ---
-class: center, middle
+class: center, middle, img-full
 
-# 😞
+![I know the way!](/assets/images/i_know_the_way.gif)
 
 ???
 
-* But sadly, this doesn't work...
-* Why not? Well, remember that code server we spoke about just a few minutes ago???
+* And we're off! But, almost right away it starts to kind of blow up.
 
 ---
 class: padding, middle
@@ -915,12 +858,8 @@ class: padding, middle
 * You'll actually get a spectacularly confusing error here!
 * Usually this sort of thing in Elixir is considered a bug, but since we're _WAY_ off the beaten
 path here and doing a lot of things we shouldn't be doing, I don't blame them for this.
-* But I'll help you cut to the chase here - this is happening because of there are two different
-code servers!
-
----
-class: padding, middle
-
+* But I'll help you cut to the chase here. Remember that code server we spoke about just a few minutes ago???
+* This is happening because of there are two different code servers!
 * Another cool thing about ExUnit - it has its own compiler!
 * Our test modules are defined in .exs files, and that means they're not compiled by the standard
 Elixir compiler.
@@ -929,21 +868,51 @@ suffix) into the code server for the BEAM node that we've just started.
 * It does a bunch of other stuff, too!
 
 ---
-class: padding, middle
+class: center, middle
+
+![](/assets/images/cserr1.png)
+
+---
+class: center, middle
+
+![](/assets/images/cserr2.png)
+
+---
+class: center, middle
+
+![](/assets/images/cserr3.png)
+
+---
+class: center, middle
+
+![](/assets/images/cserr4.png)
+
+---
+class: center, middle
+
+![](/assets/images/cserr5.png)
+
+---
+class: center, middle
+
+![](/assets/images/cserr6.png)
+
+---
+class: center, middle
+
+![](/assets/images/cserr7.png)
+
+???
 
 * So, we need to make sure that when we compile our actual test modules, that those get loaded
 onto all the code servers in our cluster.
-* So this specific error makes a bit more sense, right? When the error occured on Node 2, the
-error was that the function was undefined or private. Basically, a function with that name wasn't
-in the code server.
-* But then when ExUnit formatted that error for us, it did that formatting on the main node which
-_DID_ have that function in the code server, and it uses this information for the "Did you mean"
-recommendation there.
-* So, if we want to distribute this work, we have to also load these modules into the code servers
-on these other nodes.
 
 ---
-class: middle, padding
+class: padding
+
+.center[
+# Remote code loading
+]
 
 ```
 path = :code.get_path()
@@ -961,7 +930,11 @@ path = :code.get_path()
 sharing the code path.
 
 ---
-class: middle, padding
+class: padding
+
+.center[
+# Remote code loading
+]
 
 ```
 path = :code.get_path()
@@ -979,7 +952,11 @@ path = :code.get_path()
 * Remember, we can set that at runtime!
 
 ---
-class: middle, padding
+class: padding
+
+.center[
+# Remote code loading
+]
 
 ```
 path = :code.get_path()
@@ -997,7 +974,11 @@ path = :code.get_path()
 * But for these .exs files, we don't actually write .beam files to disk, so that won't work!
 
 ---
-class: middle, padding
+class: padding
+
+.center[
+# Remote code loading
+]
 
 ```
 path = :code.get_path()
@@ -1016,7 +997,11 @@ it would normally find in the .beam file via a function call to `:code.load_bina
 well for sure, but there's kind of another hitch.
 
 ---
-class: middle, padding
+class: padding
+
+.center[
+# Remote code loading
+]
 
 ```
 path = :code.get_path()
@@ -1038,7 +1023,11 @@ it from the .beam files - and since we don't have .beam files for these test mod
 * One thing that we sort of skipped earlier is how ExUnit compiles these test modules.
 
 ---
-class: padding, middle
+class: padding
+
+.center[
+# Test Compiler
+]
 
 ```
 case Kernel.ParallelCompiler.require(test_files, callbacks) do
@@ -1063,7 +1052,11 @@ end
 * ExUnit actually has its own compiler that is uses to find & compile your test modules for you.
 
 ---
-class: padding, middle
+class: padding
+
+.center[
+# Test Compiler
+]
 
 ```
 case Kernel.ParallelCompiler.require(test_files, callbacks) do
@@ -1071,13 +1064,7 @@ case Kernel.ParallelCompiler.require(test_files, callbacks) do
   {:error, _, _} -> exit({:shutdown, 1})
 end
 
-
 # becomes
-
-
-
-
-
 
 
 
@@ -1088,7 +1075,11 @@ end
 * Basically, we need to modify this compiler so we load all the test modules on all nodes.
 
 ---
-class: padding, middle
+class: padding
+
+.center[
+# Test Compiler
+]
 
 ```
 case Kernel.ParallelCompiler.require(test_files, callbacks) do
@@ -1096,9 +1087,7 @@ case Kernel.ParallelCompiler.require(test_files, callbacks) do
   {:error, _, _} -> exit({:shutdown, 1})
 end
 
-
 # becomes
-
 
 {results, _} = :rpc.multicall(Kernel.ParallelCompiler, :require, [test_files, callbacks])
 
