@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "jekyll", "~> 3.6.3"
+gem "jekyll", "~> 4.3.2"
 gem 'jekyll-paginate'
 gem 'kramdown'
 gem 'rack-jekyll'
